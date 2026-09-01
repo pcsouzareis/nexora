@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Repositories\TelegramChannelRepository;
+use App\Repositories\IntegrationHealthRepository;
 use App\Services\TelegramService;
 use DI\ContainerBuilder;
 use Dotenv\Dotenv;
@@ -17,6 +18,7 @@ $container = $builder->build();
 
 $channels = $container->get(TelegramChannelRepository::class);
 $telegram = $container->get(TelegramService::class);
+$health = $container->get(IntegrationHealthRepository::class);
 
 if (!$channels->tryAcquireSyncLock()) {
     fwrite(STDOUT, "Sincronização do Telegram já está em execução.\n");
@@ -31,9 +33,11 @@ try {
         try {
             $count = $telegram->synchronize($channel);
             $synchronized += $count;
+            $health->record((int) $channel['cod001'], (int) $channel['cod003'], 'Sincronização', 'Sucesso', $count . ' mensagem(ns) sincronizada(s).');
             fwrite(STDOUT, sprintf("Canal %d: %d mensagem(ns) sincronizada(s).\n", $channel['cod003'], $count));
         } catch (RuntimeException $exception) {
             $failures++;
+            $health->record((int) $channel['cod001'], (int) $channel['cod003'], 'Sincronização', 'Falha', $exception->getMessage());
             fwrite(STDERR, sprintf("Canal %d: %s\n", $channel['cod003'], $exception->getMessage()));
         }
     }

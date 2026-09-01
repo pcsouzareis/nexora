@@ -27,6 +27,31 @@
                         <div class="col-6 col-md-4"><div class="border rounded p-2 h-100"><i class="bi bi-envelope d-block fs-4 text-danger"></i><strong>E-mail</strong><div class="small text-muted">{{ integracao.email }} ativo(s)</div></div></div>
                         <div class="col-6 col-md-4"><div class="border rounded p-2 h-100"><i class="bi bi-meta d-block fs-4 text-primary"></i><strong>Meta</strong><div class="small text-muted">{{ integracao.meta }} ativo(s)</div></div></div>
                         <div class="col-6 col-md-4"><div class="border rounded p-2 h-100"><i class="bi bi-broadcast d-block fs-4 text-secondary"></i><strong>Canais</strong><div class="small text-muted">{{ integracao.canais_ativos }} ativo(s)</div></div></div>
+                        <div class="col-6 col-md-4"><div class="border rounded p-2 h-100"><i class="bi bi-diagram-3 d-block fs-4 text-warning"></i><strong>n8n</strong><div class="small text-muted">n8n: {{ integracao.n8n }}</div></div></div>
+                    </div>
+
+                    <div class="table-responsive mt-4">
+                        <table class="table table-sm align-middle mb-0">
+                            <thead><tr><th>Canal</th><th>Último resultado</th><th>Data</th></tr></thead>
+                            <tbody>
+                                {% for canal in integracao.canais %}
+                                    <tr>
+                                        <td><strong>{{ canal.des003 }}</strong><small class="d-block text-muted">{{ canal.tip003 }}</small></td>
+                                        <td>
+                                            {% if canal.sts019 %}
+                                                <span class="badge text-bg-{{ canal.sts019 == 'Sucesso' ? 'success' : 'danger' }}">{{ canal.sts019 }}</span>
+                                                <small class="d-block text-muted">{{ canal.tip019 }}{% if canal.des019 %}: {{ canal.des019 }}{% endif %}</small>
+                                            {% else %}
+                                                <span class="badge text-bg-secondary">Sem histórico</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-nowrap">{{ canal.cad019 ? canal.cad019|date('d/m/Y H:i') : '—' }}</td>
+                                    </tr>
+                                {% else %}
+                                    <tr><td colspan="3" class="text-center text-muted">Nenhum canal cadastrado.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
                 <div class="card-footer text-end"><a class="btn btn-outline-primary btn-sm" href="/canais">Abrir canais</a></div>

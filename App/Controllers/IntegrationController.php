@@ -55,6 +55,7 @@ final class IntegrationController
             $summary = $this->integrations->summaryByCompany((int) $company['cod001']);
 
             if ($summary !== []) {
+                $summary['canais'] = $this->integrations->channelsByCompany((int) $company['cod001']);
                 $summaries[] = $summary;
             }
         }

@@ -24,7 +24,13 @@ final class IntegrationRepository
                 COUNT(c.cod003) FILTER (WHERE c.sts003 = TRUE AND c.tip003 = 'WhatsApp') AS whatsapp,
                 COUNT(c.cod003) FILTER (WHERE c.sts003 = TRUE AND c.tip003 = 'Telegram') AS telegram,
                 COUNT(c.cod003) FILTER (WHERE c.sts003 = TRUE AND c.tip003 = 'E-Mail') AS email,
-                COUNT(c.cod003) FILTER (WHERE c.sts003 = TRUE AND c.tip003 IN ('Facebook', 'Instagram')) AS meta
+                COUNT(c.cod003) FILTER (WHERE c.sts003 = TRUE AND c.tip003 IN ('Facebook', 'Instagram')) AS meta,
+                (
+                    SELECT COUNT(*)
+                    FROM n005 b
+                    WHERE b.cod001 = e.cod001
+                      AND NULLIF(BTRIM(b.nkh005), '') IS NOT NULL
+                ) AS n8n
             FROM n001 e
             LEFT JOIN n013 ai ON ai.cod001 = e.cod001
             LEFT JOIN n003 c ON c.cod001 = e.cod001
@@ -36,5 +42,28 @@ final class IntegrationRepository
         $summary = $statement->fetch(PDO::FETCH_ASSOC);
 
         return $summary === false ? [] : $summary;
+    }
+
+    /** @return array<int, array<string, mixed>> */
+    public function channelsByCompany(int $companyCode): array
+    {
+        $statement = $this->database->pdo()->prepare(<<<'SQL'
+            SELECT c.cod003, c.des003, c.tip003, c.sts003,
+                   health.tip019, health.sts019, health.des019, health.cad019
+            FROM n003 c
+            LEFT JOIN LATERAL (
+                SELECT tip019, sts019, des019, cad019
+                FROM n019
+                WHERE cod003 = c.cod003
+                ORDER BY cad019 DESC, cod019 DESC
+                LIMIT 1
+            ) health ON TRUE
+            WHERE c.cod001 = :companyCode
+            ORDER BY c.sts003 DESC, c.des003
+        SQL);
+
+        $statement->execute(['companyCode' => $companyCode]);
+
+        return $statement->fetchAll(PDO::FETCH_ASSOC);
     }
 }
