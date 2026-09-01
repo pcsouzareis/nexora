@@ -128,15 +128,17 @@
 
 						<ul class="navbar-nav ms-auto">
 
+							{% if usuario_atual.perfil|default('') == 'S' %}
 							<li class="nav-item">
 
-								<a class="nav-link" href="#">
+								<a class="nav-link" href="/contrato/licenca" title="Contrato de licença da empresa atual" aria-label="Contrato de licença da empresa atual">
 
-									<i class="bi bi-bell"></i>
+									<i class="bi bi-file-earmark-text"></i>
 
 								</a>
 
 							</li>
+							{% endif %}
 
 						</ul>
 

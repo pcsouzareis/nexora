@@ -1,6 +1,9 @@
 Options -Indexes
 RewriteEngine On
 
+# O modelo contém variáveis e deve ser entregue apenas pela rota autenticada.
+RewriteRule ^assets/contrato/contrato_licenca_nexora\.html$ - [F,L,NC]
+
 # Expõe somente os arquivos estáticos dentro de Public/assets.
 RewriteRule ^assets/(.+)$ Public/assets/$1 [L,NC]
 

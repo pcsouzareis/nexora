@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Repositories\AuditRepository;
+use App\Repositories\LicenseContractAccessRepository;
 use App\Services\AuthService;
 use App\Support\Session;
 use Psr\Http\Message\ResponseInterface;
@@ -16,7 +17,8 @@ final class AuthController
     public function __construct(
         private readonly Twig $view,
         private readonly AuthService $auth,
-        private readonly AuditRepository $audit
+        private readonly AuditRepository $audit,
+        private readonly LicenseContractAccessRepository $contractAccesses
     ) {}
 
     public function showLogin(
@@ -68,6 +70,18 @@ final class AuthController
         $user = Session::user();
         if ($user !== null) {
             $this->audit->record((int) $user['cod001'], (int) $user['cod002'], 'LOGIN', 'Sessão', null, 'Login realizado.', $this->clientIp($request));
+
+            if (
+                (string) $user['rol002'] === 'S'
+                && $this->contractAccesses->isFirstAccess(
+                    (int) $user['cod001'],
+                    (int) $user['cod002']
+                )
+            ) {
+                return $response
+                    ->withHeader('Location', '/contrato/licenca')
+                    ->withStatus(302);
+            }
         }
 
         return $response

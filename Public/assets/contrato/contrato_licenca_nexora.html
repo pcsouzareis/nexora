@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>Contrato de Licença de Uso de Software - Nexora</title>
+		<style>
+			body {
+				font-family: Arial, Helvetica, sans-serif;
+				line-height: 1.55;
+				margin: 0;
+				background: #f5f5f5;
+				color: #222
+			}
+			.contract {
+				max-width: 900px;
+				margin: 30px auto;
+				background: white;
+				padding: 45px 55px;
+				border: 1px solid #ddd;
+				border-radius: 10px
+			}
+			h1 {
+				text-align: center;
+				font-size: 24px
+			}
+			h2 {
+				font-size: 18px;
+				margin-top: 28px;
+				border-bottom: 1px solid #ddd;
+				padding-bottom: 5px
+			}
+			p {
+				text-align: justify
+			}
+			.box,
+			.acceptance {
+				border: 1px solid #ddd;
+				background: #fafafa;
+				padding: 16px 18px;
+				border-radius: 8px
+			}
+			.field {
+				font-weight: bold
+			}
+			.signatures {
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				gap: 40px;
+				margin-top: 45px
+			}
+			.signature {
+				border-top: 1px solid #222;
+				padding-top: 8px;
+				text-align: center
+			}
+			.meta,
+			.notice {
+				font-size: 13px;
+				color: #666
+			}
+			.actions {
+				margin: 0 0 24px;
+				text-align: right
+			}
+			.back-button {
+				display: inline-block;
+				padding: 10px 16px;
+				border-radius: 6px;
+				background: #0d3b66;
+				color: #fff;
+				font-weight: bold;
+				text-decoration: none
+			}
+			.back-button:hover {
+				background: #092d4d;
+				color: #fff
+			}
+			@media(max-width:700px) {
+				.contract {
+					margin: 0;
+					padding: 25px 18px;
+					border: 0
+				}
+				.signatures {
+					grid-template-columns: 1fr
+				}
+			}
+			@media print {
+				body {
+					background: white
+				}
+				.contract {
+					border: 0;
+					margin: 0;
+					max-width: none;
+					padding: 0
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<main class="contract">
+			<p class="actions">
+				<a class="back-button" href="/dashboard">Voltar ao dashboard</a>
+			</p>
+			<h1>CONTRATO DE LICENÇA DE USO DE SOFTWARE E PRESTAÇÃO DE SERVIÇOS DE IMPLANTAÇÃO</h1>
+			<p style="text-align:center">
+				<strong>Plataforma Nexora</strong>
+				— Versão contratual
+				{{VERSAO_CONTRATO}}</p>
+
+			<div class="box">
+				<p>
+					<strong>LICENCIANTE:</strong>
+					{{RAZAO_SOCIAL_LICENCIANTE}}, CPF/CNPJ nº
+					{{CPF_CNPJ_LICENCIANTE}}, endereço
+					{{ENDERECO_LICENCIANTE}}.</p>
+				<p>
+					<strong>LICENCIADA:</strong>
+					{{RAZAO_SOCIAL_CLIENTE}}, CPF/CNPJ nº
+					{{CPF_CNPJ_CLIENTE}}, endereço
+					{{ENDERECO_CLIENTE}}.</p>
+			</div>
+
+			<p>As partes acima identificadas celebram o presente Contrato de Licença de Uso de Software e Prestação de Serviços de Implantação da plataforma
+				<strong>Nexora</strong>, mediante as cláusulas seguintes.</p>
+
+			<h2>1. Objeto</h2>
+			<p>1.1. O presente contrato tem por objeto a concessão, pela LICENCIANTE à LICENCIADA, de licença de uso da plataforma Nexora, em caráter não exclusivo, não transferível e limitado às condições deste instrumento.</p>
+			<p>1.2. A contratação não representa compra, cessão ou transferência de propriedade do software, código-fonte, arquitetura, componentes, marca, documentação técnica ou demais direitos de propriedade intelectual relacionados ao Nexora.</p>
+			<p>1.3. Integram também o objeto os serviços de implantação e configuração inicial definidos neste contrato e/ou na proposta comercial vinculada à contratação.</p>
+
+			<h2>2. Licença de uso</h2>
+			<p>2.1. A licença autoriza a LICENCIADA a utilizar o Nexora exclusivamente em benefício de sua própria operação empresarial, durante a vigência da contratação.</p>
+			<p>2.2. É vedado ceder, sublicenciar, vender, alugar, emprestar ou transferir a licença a terceiros, bem como copiar, descompilar, desmontar, realizar engenharia reversa ou tentar obter o código-fonte do Nexora, salvo autorização expressa e escrita da LICENCIANTE.</p>
+
+			<h2>3. Implantação e configuração inicial</h2>
+			<p>3.1. Pela implantação inicial, a LICENCIADA pagará
+				<strong>{{VALOR_IMPLANTACAO}}</strong>, salvo condição diversa expressamente indicada na proposta comercial.</p>
+			<p>3.2. O valor contempla a disponibilização do ambiente contratado e a configuração inicial prevista no escopo.</p>
+			<p>3.3. Salvo indicação diversa na proposta, está incluída
+				<strong>uma configuração inicial por tipo de canal, recurso ou integração contratada</strong>.</p>
+			<p>3.4. Após a conclusão e homologação da implantação, novas parametrizações, mudanças de regras, prompts, fluxos, integrações, cadastros ou configurações passam a ser de responsabilidade da LICENCIADA.</p>
+			<p>3.5. Configurações adicionais, customizações ou novos serviços executados pela LICENCIANTE poderão ser cobrados separadamente mediante orçamento prévio.</p>
+
+			<h2>4. Integração com n8n</h2>
+			<p>4.1. Quando contratada integração com n8n, a implantação inclui exclusivamente a
+				<strong>configuração, dentro do Nexora, de 1 (um) fluxo n8n previamente existente e disponibilizado pela LICENCIADA</strong>.</p>
+			<p>4.2. Não estão incluídos no valor de implantação a criação, desenvolvimento, desenho, programação, alteração, correção, manutenção ou suporte do workflow/fluxo dentro do n8n.</p>
+			<p>4.3. Criação ou modificação de fluxos n8n, integrações com ERPs, bancos de dados, planilhas, APIs, documentos ou sistemas de terceiros constituem serviços adicionais e poderão ser contratados mediante orçamento.</p>
+			<p>4.4. A LICENCIADA é responsável pelas credenciais, permissões, contas, infraestrutura e serviços de terceiros necessários ao funcionamento de seus fluxos, salvo contratação expressa em sentido diverso.</p>
+
+			<h2>5. Suporte e serviços adicionais</h2>
+			<p>5.1. Suporte técnico corresponde à análise e correção de falhas de funcionamento atribuíveis à plataforma Nexora.</p>
+			<p>5.2. Não são considerados suporte técnico: criação de fluxos, alteração de regras de negócio, mudança de prompts, reconfiguração de canais, treinamento adicional, customizações, integrações, desenvolvimento sob demanda ou mudanças solicitadas após a implantação.</p>
+			<p>5.3. Serviços não incluídos poderão ser executados mediante orçamento e aceite específicos.</p>
+
+			<h2>6. Licença anual, renovação e vencimento</h2>
+			<p>6.1. Além da taxa de implantação, a utilização da plataforma está sujeita ao pagamento da licença anual definida na proposta comercial.</p>
+			<p>6.2. No primeiro ano, o valor da licença anual será calculado proporcionalmente ao período entre o início da licença e o mês de dezembro, conforme critério comercial informado à LICENCIADA.</p>
+			<p>6.3. A partir do exercício seguinte, a licença anual será cobrada integralmente no mês de dezembro, conforme valor vigente e critérios de reajuste definidos na proposta comercial ou em comunicação contratual aplicável.</p>
+			<p>6.4. O não pagamento poderá resultar na suspensão de acesso à plataforma após o prazo aplicável informado pela LICENCIANTE.</p>
+
+			<h2>7. Serviços e plataformas de terceiros</h2>
+			<p>7.1. O Nexora poderá depender de serviços, APIs e plataformas de terceiros, incluindo provedores de inteligência artificial, Meta/WhatsApp, Instagram, Facebook, n8n, hospedagem, bancos de dados e APIs externas.</p>
+			<p>7.2. Custos cobrados por terceiros não estão incluídos no valor da licença ou implantação, salvo quando expressamente informado na proposta.</p>
+			<p>7.3. A LICENCIANTE não garante disponibilidade permanente de serviços de terceiros e não se responsabiliza por alterações de políticas, preços, APIs, limites, bloqueios, indisponibilidades ou encerramento de serviços promovidos por seus fornecedores.</p>
+
+			<h2>8. Obrigações da LICENCIADA</h2>
+			<p>8.1. Compete à LICENCIADA fornecer informações e acessos necessários à implantação, manter seguras suas credenciais, utilizar a plataforma de forma lícita, administrar suas configurações após a implantação e garantir a legalidade dos dados, conteúdos, prompts, cadastros e integrações utilizados em sua operação.</p>
+
+			<h2>9. Proteção de dados e LGPD</h2>
+			<p>9.1. As partes comprometem-se a observar a legislação aplicável à proteção de dados pessoais, especialmente a Lei nº 13.709/2018 (LGPD), dentro dos limites de suas respectivas responsabilidades.</p>
+			<p>9.2. A LICENCIADA é responsável pela definição das finalidades e bases legais aplicáveis ao tratamento dos dados inseridos ou processados no Nexora em sua operação, quando atuar como controladora dos dados.</p>
+			<p>9.3. A LICENCIANTE adotará medidas técnicas e administrativas razoáveis para proteção dos dados tratados no âmbito da plataforma, observadas as características do serviço e obrigações legalmente aplicáveis.</p>
+
+			<h2>10. Propriedade intelectual</h2>
+			<p>10.1. Todos os direitos de propriedade intelectual relacionados ao Nexora permanecem de titularidade da LICENCIANTE ou de seus respectivos titulares.</p>
+			<p>10.2. A contratação não implica, em nenhuma hipótese, cessão, transferência ou aquisição do código-fonte, propriedade intelectual ou titularidade da plataforma Nexora.</p>
+			<p>10.3. Dados, cadastros, conteúdos e informações próprias da LICENCIADA permanecem pertencentes à LICENCIADA, ressalvados conteúdos ou direitos de terceiros.</p>
+
+			<h2>11. Atualizações da plataforma</h2>
+			<p>11.1. A LICENCIANTE poderá promover atualizações, correções, melhorias, mudanças de interface, arquitetura ou funcionalidades da plataforma.</p>
+			<p>11.2. Novos módulos, funcionalidades especiais ou serviços adicionais poderão ser objeto de contratação e cobrança próprias.</p>
+
+			<h2>12. Limitação de responsabilidade</h2>
+			<p>12.1. O Nexora é ferramenta tecnológica de apoio à operação da LICENCIADA e não substitui decisões humanas, avaliações profissionais ou responsabilidades próprias da atividade empresarial da LICENCIADA.</p>
+			<p>12.2. A LICENCIANTE não se responsabiliza por perdas decorrentes de uso inadequado da plataforma, configurações realizadas pela LICENCIADA, conteúdos fornecidos pelo cliente, indisponibilidade de terceiros, falhas de internet ou infraestrutura externa, credenciais comprometidas ou integrações não desenvolvidas pela LICENCIANTE.</p>
+			<p>12.3. Eventual responsabilidade da LICENCIANTE observará os limites permitidos pela legislação aplicável e as circunstâncias concretas do serviço contratado.</p>
+
+			<h2>13. Vigência, rescisão e suspensão</h2>
+			<p>13.1. O contrato entra em vigor na data definida na proposta comercial ou no início efetivo da disponibilização da licença.</p>
+			<p>13.2. O contrato poderá ser rescindido por descumprimento contratual, inadimplência ou conforme demais condições comerciais pactuadas.</p>
+			<p>13.3. Encerrada a licença, a LICENCIANTE poderá suspender o acesso ao Nexora, observando, quando aplicável, prazo e condições previamente informadas para exportação ou retirada de dados da LICENCIADA.</p>
+
+			<h2>14. Confirmação digital</h2>
+			<p>14.1. A LICENCIADA declara que recebeu previamente acesso ao presente contrato, inclusive por meio físico e/ou eletrônico, tendo oportunidade de ler e compreender suas condições antes da confirmação digital.</p>
+			<p>14.2. No primeiro acesso à plataforma, a LICENCIADA poderá ser solicitada a confirmar eletronicamente sua ciência e concordância com a versão vigente deste contrato.</p>
+			<p>14.3. A confirmação digital realizada por usuário autorizado da LICENCIADA constituirá registro adicional de ciência e aceite, sem prejuízo do instrumento físico ou eletrônico previamente celebrado entre as partes.</p>
+			<p>14.4. Para fins de registro, a plataforma poderá armazenar identificação do usuário, empresa, data e hora do aceite, versão do contrato, endereço IP e outros elementos técnicos razoavelmente necessários à comprovação do evento, observada a legislação aplicável.</p>
+
+			<h2>15. Disposições gerais</h2>
+			<p>15.1. A tolerância de uma parte quanto ao descumprimento de obrigação pela outra não constitui renúncia, novação ou alteração contratual.</p>
+			<p>15.2. Se qualquer disposição for considerada inválida ou inexequível, as demais permanecerão em vigor na máxima extensão permitida.</p>
+			<p>15.3. A proposta comercial aceita pela LICENCIADA integra este contrato para definição de valores, módulos, canais, usuários, integrações, escopo e demais condições específicas.</p>
+
+			<h2>16. Foro</h2>
+			<p>16.1. Fica eleito o foro da comarca de
+				<strong>{{CIDADE_FORO}}/{{UF_FORO}}</strong>, ressalvadas as hipóteses em que a legislação determinar foro diverso, para dirimir controvérsias relacionadas a este contrato.</p>
+
+			<div class="signatures">
+				<div class="signature">LICENCIANTE<br>{{RAZAO_SOCIAL_LICENCIANTE}}</div>
+				<div class="signature">LICENCIADA<br>{{RAZAO_SOCIAL_CLIENTE}}</div>
+			</div>
+
+			<div class="acceptance">
+				<h2 style="border:0;margin-top:0">Confirmação eletrônica no primeiro acesso</h2>
+				<label>
+					<input type="checkbox" id="contractAcceptance">
+					Declaro que recebi acesso prévio ao Contrato de Licença de Uso da Plataforma Nexora, li suas condições e confirmo minha ciência e concordância com a versão
+					<strong>{{VERSAO_CONTRATO}}</strong>.
+				</label>
+				<p class="meta">O aceite efetivo deve ser registrado pelo backend com, no mínimo: ID do usuário, ID da empresa, versão do contrato e data/hora do aceite. IP e demais dados técnicos podem ser armazenados quando adequados e legalmente justificáveis.</p>
+			</div>
+
+			<p class="notice">Modelo para personalização. Antes do uso comercial definitivo, recomenda-se revisão jurídica, especialmente quanto a LGPD, responsabilidade, rescisão, foro, tributação, reajuste e forma de cobrança.</p>
+		</main>
+	</body>
+</html>
