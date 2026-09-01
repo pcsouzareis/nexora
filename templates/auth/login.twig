@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Login - {{ app_name|default('Nexora') }}</title>
+    <link rel="icon" href="/assets/images/favicon-nexora.ico" sizes="any">
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100%;
+        }
+
+        body {
+            font-family:
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                Roboto,
+                Arial,
+                sans-serif;
+
+            background: linear-gradient(135deg, #061d5a 0%, #0756c9 58%, #08bddd 100%);
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            min-height: 100vh;
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+        }
+
+        .login-card {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 32px;
+
+            box-shadow:
+                0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        .login-header h1 {
+            margin: 0 0 8px;
+
+            font-size: 28px;
+            font-weight: 600;
+
+            color: #222222;
+        }
+
+        .login-header p {
+            margin: 0;
+
+            font-size: 14px;
+            color: #666666;
+        }
+
+        .login-logo {
+            display: block;
+            width: 100%;
+            max-width: 260px;
+            height: auto;
+            margin: 0 auto 26px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+
+            margin-bottom: 7px;
+
+            font-size: 14px;
+            font-weight: 600;
+
+            color: #333333;
+        }
+
+        .form-group input {
+            width: 100%;
+
+            height: 46px;
+
+            padding: 0 13px;
+
+            border: 1px solid #d5d9dd;
+            border-radius: 7px;
+
+            background: #ffffff;
+
+            font-size: 16px;
+
+            outline: none;
+
+            transition:
+                border-color 0.2s,
+                box-shadow 0.2s;
+        }
+
+        .form-group input:focus {
+            border-color: #4a90e2;
+
+            box-shadow:
+                0 0 0 3px rgba(74, 144, 226, 0.12);
+        }
+
+        .error {
+            margin-bottom: 20px;
+
+            padding: 12px 14px;
+
+            border-radius: 7px;
+
+            background: #fff1f1;
+            border: 1px solid #f0b8b8;
+
+            color: #b42318;
+
+            font-size: 14px;
+        }
+
+        .login-button {
+            width: 100%;
+
+            height: 46px;
+
+            border: 0;
+            border-radius: 7px;
+
+            background: #222222;
+            color: #ffffff;
+
+            font-size: 16px;
+            font-weight: 600;
+
+            cursor: pointer;
+
+            transition:
+                background 0.2s,
+                transform 0.1s;
+        }
+
+        .login-button:hover {
+            background: #000000;
+        }
+
+        .login-button:active {
+            transform: translateY(1px);
+        }
+
+        .login-footer {
+            margin-top: 24px;
+
+            text-align: center;
+
+            font-size: 12px;
+
+            color: #888888;
+        }
+
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 15px;
+            }
+
+            .login-card {
+                padding: 25px 20px;
+            }
+
+            .login-header h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <main class="login-container">
+
+        <section class="login-card">
+
+            {% if change_password|default(false) %}
+
+                <header class="login-header">
+                    <h1>Minha senha</h1>
+                    <p>Informe sua senha atual para definir uma nova.</p>
+                </header>
+
+                {% if error is defined and error %}
+                    <div class="error">{{ error }}</div>
+                {% endif %}
+
+                {% if success is defined and success %}
+                    <div class="error" style="color: #166534; background: #f0fdf4; border-color: #bbf7d0;">{{ success }}</div>
+                {% endif %}
+
+                <form method="post" action="/minha-senha" autocomplete="on">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                    <div class="form-group">
+                        <label for="senha_atual">Senha atual</label>
+                        <input type="password" id="senha_atual" name="senha_atual" autocomplete="current-password" required autofocus>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="nova_senha">Nova senha</label>
+                        <input type="password" id="nova_senha" name="nova_senha" minlength="8" autocomplete="new-password" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirmacao_senha">Confirmar nova senha</label>
+                        <input type="password" id="confirmacao_senha" name="confirmacao_senha" minlength="8" autocomplete="new-password" required>
+                    </div>
+
+                    <div style="display: flex; gap: 10px;">
+                        <a href="/dashboard" class="login-button" style="display: inline-flex; flex: 1; align-items: center; justify-content: center; text-decoration: none; background: #6c757d;">Voltar</a>
+                        <button type="submit" class="login-button" style="flex: 1;">Atualizar senha</button>
+                    </div>
+                </form>
+
+            {% else %}
+
+            <img
+                class="login-logo"
+                src="/assets/images/logo-wallpaper.png"
+                alt="{{ app_name|default('Nexora') }}"
+            >
+
+            {% if error is defined and error %}
+                <div class="error">
+                    {{ error }}
+                </div>
+            {% endif %}
+
+            <form
+                method="post"
+                action="/login"
+                autocomplete="on"
+            >
+
+                <div class="form-group">
+
+                    <label for="code">
+                        Código
+                    </label>
+
+                    <input
+                        type="number"
+                        id="code"
+                        name="code"
+                        value="{{ code|default('') }}"
+                        placeholder="Digite seu código"
+                        autocomplete="username"
+                        min="1"
+                        required
+                        autofocus
+                    >
+
+                </div>
+
+                <div class="form-group">
+
+                    <label for="password">
+                        Senha
+                    </label>
+
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        placeholder="Digite sua senha"
+                        autocomplete="current-password"
+                        required
+                    >
+
+                </div>
+
+                <button
+                    type="submit"
+                    class="login-button"
+                >
+                    Entrar
+                </button>
+
+            </form>
+
+            <footer class="login-footer">
+                {{ app_name|default('Nexora') }} - próxima geração
+            </footer>
+
+            {% endif %}
+
+        </section>
+
+    </main>
+
+</body>
+</html>

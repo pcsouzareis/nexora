@@ -1,0 +1,150 @@
+{% extends 'layouts/adminlte.twig' %}
+
+{% block title %}Teste do webhook | {{ app_name|default('Nexora') }}{% endblock %}
+
+{% block page_title %}Teste do webhook e IA{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-lg-7">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="bi bi-send me-2"></i>Enviar mensagem de teste
+                    </h3>
+                </div>
+
+                <form method="post" action="/testes/webhook">
+                    <div class="card-body">
+                        {% if erro %}
+                            <div class="alert alert-danger">{{ erro }}</div>
+                        {% endif %}
+
+                        <div class="alert alert-info">
+                            Esta tela executa o mesmo processamento do webhook público,
+                            mas sem exigir a chave do canal. A mensagem e a resposta são gravadas.
+                        </div>
+
+                        {% if canais is empty or bases is empty %}
+                            <div class="alert alert-warning mb-0">
+                                A empresa atual precisa ter pelo menos um canal e uma base de aprendizado ativos.
+                            </div>
+                        {% else %}
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="channel_id" class="form-label">
+                                        Canal
+                                        <i class="bi bi-question-circle ms-1 text-muted" tabindex="0" data-bs-toggle="tooltip" title="Canal pelo qual a mensagem seria recebida. Ele define a empresa e organiza a conversa gerada no teste."></i>
+                                    </label>
+                                    <select id="channel_id" name="channel_id" class="form-select" required>
+                                        {% for canal in canais %}
+                                            <option value="{{ canal.cod003 }}" {% if dados.channel_id|default(0) == canal.cod003 %}selected{% endif %}>
+                                                #{{ canal.cod003 }} — {{ canal.des003 }} ({{ canal.tip003 }})
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="base_id" class="form-label">
+                                        Base de aprendizado
+                                        <i class="bi bi-question-circle ms-1 text-muted" tabindex="0" data-bs-toggle="tooltip" title="Base usada para responder. Apenas artigos ativos e Públicos desta base são enviados como referência para a IA."></i>
+                                    </label>
+                                    <select id="base_id" name="base_id" class="form-select" required>
+                                        {% for base in bases %}
+                                            <option value="{{ base.cod005 }}" {% if dados.base_id|default(0) == base.cod005 %}selected{% endif %}>
+                                                #{{ base.cod005 }} — {{ base.des005 }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="external_id" class="form-label">
+                                        external_id
+                                        <i class="bi bi-question-circle ms-1 text-muted" tabindex="0" data-bs-toggle="tooltip" title="Identificador único do cliente no sistema de origem, como telefone, ID do WhatsApp ou código do CRM."></i>
+                                    </label>
+                                    <input id="external_id" name="external_id" class="form-control" maxlength="120" required value="{{ dados.external_id|default('') }}">
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="name" class="form-label">
+                                        Nome do cliente
+                                        <i class="bi bi-question-circle ms-1 text-muted" tabindex="0" data-bs-toggle="tooltip" title="Nome de exibição do cliente. Se o external_id já existir, o cadastro existente será reutilizado."></i>
+                                    </label>
+                                    <input id="name" name="name" class="form-control" maxlength="150" value="{{ dados.name|default('') }}">
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="conversation_id" class="form-label">
+                                        conversation_id
+                                        <i class="bi bi-question-circle ms-1 text-muted" tabindex="0" data-bs-toggle="tooltip" title="Identificador da conversa no canal de origem. Use o mesmo valor para agrupar novas mensagens na mesma conversa."></i>
+                                    </label>
+                                    <input id="conversation_id" name="conversation_id" class="form-control" maxlength="120" value="{{ dados.conversation_id|default('') }}">
+                                </div>
+
+                                <div class="col-12">
+                                    <label for="message" class="form-label">
+                                        message
+                                        <i class="bi bi-question-circle ms-1 text-muted" tabindex="0" data-bs-toggle="tooltip" title="Pergunta que será gravada como mensagem do cliente e enviada à IA. O message_id é gerado automaticamente pelo Nexora ao executar o teste."></i>
+                                    </label>
+                                    <textarea id="message" name="message" class="form-control" rows="4" maxlength="10000" required>{{ dados.message|default('') }}</textarea>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    {% if canais is not empty and bases is not empty %}
+                        <div class="card-footer text-end">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-play-fill me-1"></i>Executar teste
+                            </button>
+                        </div>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="bi bi-braces me-2"></i>Resultado</h3>
+                </div>
+                <div class="card-body">
+                    {% if resultado is not empty %}
+                        {% if resultado.processed|default(false) %}
+                            <div class="alert alert-success">Mensagem processada pela IA.</div>
+                        {% elseif resultado.duplicate|default(false) %}
+                            <div class="alert alert-secondary">Mensagem já processada anteriormente.</div>
+                        {% else %}
+                            <div class="alert alert-warning">Mensagem gravada, mas ainda não processada pela IA.</div>
+                        {% endif %}
+
+                        {% if resultado.reply is defined and resultado.reply %}
+                            <label class="form-label">Resposta do chatbot</label>
+                            <div class="border rounded p-3 bg-light mb-3" style="white-space: pre-wrap;">{{ resultado.reply.message }}</div>
+                        {% endif %}
+
+                        {% if resultado.message_id is defined %}
+                            <p class="small text-muted mb-3">
+                                Mensagem interna gravada: #{{ resultado.message_id }}.
+                            </p>
+                        {% endif %}
+
+                        <pre class="bg-dark text-light rounded p-3 mb-0"><code>{{ resultado|json_encode(constant('JSON_PRETTY_PRINT')) }}</code></pre>
+                    {% else %}
+                        <p class="text-muted mb-0">O retorno do processamento aparecerá aqui.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (element) {
+            new bootstrap.Tooltip(element);
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,65 @@
+{% extends 'layouts/adminlte.twig' %}
+
+{% block title %}Conversa #{{ conversa.cod008 }} | {{ app_name }}{% endblock %}
+{% block page_title %}Conversa #{{ conversa.cod008 }}{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong>{{ conversa.cliente }}</strong>{% if conversa.cliente_online %}<span class="badge text-bg-success ms-1">Online</span>{% endif %}
+                        <span class="badge text-bg-{{ conversa.sts008 == 'Encerrada' or conversa.sts008 == 'Cancelada' ? 'secondary' : (conversa.sts008 == 'Aguardando' ? 'warning' : (conversa.sts008 == 'Em Atendimento' ? 'primary' : 'success')) }} ms-2">{{ conversa.sts008 }}</span>
+                    </div>
+                    <a href="/conversas" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left me-1"></i>Voltar</a>
+                </div>
+                <div class="card-body bg-light" style="max-height: 520px; overflow-y: auto;">
+                    {% for mensagem in mensagens %}
+                        {% set own = mensagem.ori009 in ['Atendente', 'Chatbot'] %}
+                        <div class="d-flex mb-3 {{ own ? 'justify-content-end' : 'justify-content-start' }}">
+                            <div class="rounded p-3 {{ mensagem.ori009 == 'Cliente' ? 'bg-white border' : (mensagem.ori009 == 'Chatbot' ? 'bg-info-subtle' : 'bg-primary text-white') }}" style="max-width: 80%; white-space: pre-wrap;">
+                                <small class="d-block mb-1 {{ mensagem.ori009 == 'Atendente' ? 'text-white-50' : 'text-muted' }}">
+                                    {{ mensagem.ori009 }}{% if mensagem.atendente %} · {{ mensagem.atendente }}{% endif %}
+                                </small>
+                                {{ mensagem.con009|default('')|nl2br }}
+                                <small class="d-block mt-1 {{ mensagem.ori009 == 'Atendente' ? 'text-white-50' : 'text-muted' }}">{{ mensagem.env009|date('d/m/Y H:i') }}</small>
+                                {% if mensagem.ori009 == 'Atendente' and mensagem.entrega_status %}<small class="d-block mt-1 {{ mensagem.entrega_status == 'Falha' ? 'text-warning' : 'text-white-50' }}">Z-API: {{ mensagem.entrega_status }}{% if mensagem.entrega_erro %} · {{ mensagem.entrega_erro }}{% endif %}</small>{% endif %}
+                            </div>
+                        </div>
+                    {% else %}
+                        <p class="text-muted text-center">Esta conversa ainda não possui mensagens.</p>
+                    {% endfor %}
+                </div>
+                {% if can_manage and conversa.sts008 not in ['Encerrada', 'Cancelada'] %}
+                    <form method="post" action="/conversas/{{ conversa.cod008 }}/responder">
+                        <div class="card-footer">
+                            <label for="message" class="form-label">Resposta do atendente</label>
+                            <textarea id="message" name="message" class="form-control" rows="3" maxlength="10000" required placeholder="Digite a resposta que será registrada para o cliente."></textarea>
+                            <div class="text-end mt-2"><button class="btn btn-primary"><i class="bi bi-send me-1"></i>Registrar resposta</button></div>
+                        </div>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header"><h3 class="card-title">Dados do atendimento</h3></div>
+                <div class="card-body">
+                    <dl class="mb-0">
+                        <dt>Canal</dt><dd>{{ conversa.canal }}</dd>
+                        <dt>Base</dt><dd>{{ conversa.base|default('Não definida') }}</dd>
+                        <dt>Atendente</dt><dd>{{ conversa.atendente|default('Não assumida') }}{% if conversa.atendimento_humano %} <span class="badge text-bg-primary">IA pausada</span>{% endif %}</dd>
+                        {% if conversa.sts008 == 'Aguardando' %}<dt>Fila</dt><dd><span class="text-warning-emphasis">O cliente enviou uma nova mensagem e aguarda resposta.</span></dd>{% endif %}
+                        <dt>Telefone</dt><dd>{{ conversa.tel007|default('Não informado') }}</dd>
+                        <dt>Início</dt><dd>{{ conversa.ini008|date('d/m/Y H:i') }}</dd>
+                    </dl>
+                    {% if can_manage and conversa.sts008 not in ['Encerrada', 'Cancelada'] %}
+                        <form method="post" action="/conversas/{{ conversa.cod008 }}/assumir" class="d-grid mb-2"><button class="btn btn-outline-primary">Assumir atendimento</button></form>
+                        <form method="post" action="/conversas/{{ conversa.cod008 }}/encerrar" class="d-grid"><button class="btn btn-outline-danger">Encerrar conversa</button></form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

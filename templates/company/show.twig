@@ -1,0 +1,215 @@
+{% extends 'layouts/adminlte.twig' %}
+
+{% block title %}
+    {{ empresa.des001 }} | {{ app_name }}
+{% endblock %}
+
+{% block page_title %}
+    Empresa
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid">
+
+    <div class="row mb-3">
+
+        <div class="col-12">
+
+            <a href="/empresas" class="btn btn-secondary">
+                <i class="bi bi-arrow-left me-1"></i>
+                Voltar
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <div class="row">
+
+        <div class="col-lg-8">
+
+            <div class="card">
+
+                <div class="card-header">
+
+                    <h3 class="card-title">
+                        <i class="bi bi-building me-2"></i>
+                        Dados da Empresa
+                    </h3>
+
+                </div>
+
+                <div class="card-body">
+
+                    <div class="row">
+
+                        <div class="col-md-6 mb-3">
+
+                            <label class="form-label text-muted">
+                                Código
+                            </label>
+
+                            <div>
+                                <strong>
+                                    #{{ empresa.cod001 }}
+                                </strong>
+                            </div>
+
+                        </div>
+
+
+                        <div class="col-md-6 mb-3">
+
+                            <label class="form-label text-muted">
+                                Status
+                            </label>
+
+                            <div>
+
+                                {% if empresa.sts001 %}
+
+                                    <span class="badge text-bg-success">
+                                        Ativa
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="badge text-bg-secondary">
+                                        Inativa
+                                    </span>
+
+                                {% endif %}
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="col-12 mb-3">
+
+                            <label class="form-label text-muted">
+                                Nome / Razão Social
+                            </label>
+
+                            <div>
+                                <strong>
+                                    {{ empresa.des001 }}
+                                </strong>
+                            </div>
+
+                        </div>
+
+
+                        <div class="col-md-6 mb-3">
+
+                            <label class="form-label text-muted">
+                                Documento
+                            </label>
+
+                            <div>
+                                {{ empresa.doc001|default('—') }}
+                            </div>
+
+                        </div>
+
+
+                        <div class="col-md-6 mb-3">
+
+                            <label class="form-label text-muted">
+                                Telefone
+                            </label>
+
+                            <div>
+                                {{ empresa.tel001|default('—') }}
+                            </div>
+
+                        </div>
+
+
+                        <div class="col-12 mb-3">
+
+                            <label class="form-label text-muted">
+                                E-mail
+                            </label>
+
+                            <div>
+                                {{ empresa.ema001 }}
+                            </div>
+
+                        </div>
+
+
+                        <div class="col-12 mb-3">
+
+                            <label class="form-label text-muted">
+                                Logo
+                            </label>
+
+                            <div>
+                                {{ empresa.log001|default('Nenhuma logo cadastrada') }}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-lg-4">
+
+            <div class="card">
+
+                <div class="card-header">
+
+                    <h3 class="card-title">
+                        <i class="bi bi-info-circle me-2"></i>
+                        Informações
+                    </h3>
+
+                </div>
+
+                <div class="card-body">
+
+                    <p class="mb-3">
+
+                        <strong>
+                            Cadastrada em:
+                        </strong>
+
+                        <br>
+
+                        {{ empresa.cad001 }}
+
+                    </p>
+
+
+                    <p class="mb-0">
+
+                        <strong>
+                            Última atualização:
+                        </strong>
+
+                        <br>
+
+                        {{ empresa.atu001 }}
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

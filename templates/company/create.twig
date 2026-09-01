@@ -1,0 +1,200 @@
+{% extends 'layouts/adminlte.twig' %}
+
+{% block title %}
+	Nova Empresa | {{ app_name }}
+{% endblock %}
+
+{% block page_title %}
+	Nova Empresa
+{% endblock %}
+
+{% block content %}
+
+	<div
+		class="container-fluid">
+
+		{# Cabeçalho #}
+		<div class="row mb-3">
+			<div class="col-12">
+
+				<div class="d-flex justify-content-between align-items-center">
+
+					<div>
+						<h4 class="mb-1">
+							<i class="bi bi-building-add me-2"></i>
+							Nova Empresa
+						</h4>
+
+						<p class="text-muted mb-0">
+							Cadastre uma nova empresa na plataforma.
+						</p>
+					</div>
+
+					<div>
+						<a href="/empresas" class="btn btn-outline-secondary">
+							<i class="bi bi-arrow-left me-1"></i>
+							Voltar
+						</a>
+					</div>
+
+				</div>
+
+			</div>
+		</div>
+
+
+		{# Formulário #}
+		<div class="row">
+
+			<div class="col-lg-8">
+
+				<div class="card">
+
+					<div class="card-header">
+						<h3 class="card-title">
+							<i class="bi bi-building me-2"></i>
+							Dados da Empresa
+						</h3>
+					</div>
+
+
+					<form method="post" action="/empresas" enctype="multipart/form-data">
+
+						<div
+							class="card-body">
+
+							{# Nome #}
+							<div class="mb-3">
+
+								<label for="des001" class="form-label">
+									Nome / Razão Social
+									<span class="text-danger">*</span>
+								</label>
+
+								<input type="text" id="des001" name="des001" class="form-control" maxlength="150" required autocomplete="organization">
+
+							</div>
+
+
+							{# Documento #}
+							<div class="mb-3">
+
+								<label for="doc001" class="form-label">
+									Documento
+								</label>
+
+								<input type="text" id="doc001" name="doc001" class="form-control" maxlength="30" autocomplete="off">
+
+								<div class="form-text">
+									CNPJ ou outro documento de identificação.
+								</div>
+
+							</div>
+
+
+							{# E-mail #}
+							<div class="mb-3">
+
+								<label for="ema001" class="form-label">
+									E-mail
+									<span class="text-danger">*</span>
+								</label>
+
+								<input type="email" id="ema001" name="ema001" class="form-control" maxlength="255" required autocomplete="email">
+
+							</div>
+
+
+							{# Telefone #}
+							<div class="mb-3">
+
+								<label for="tel001" class="form-label">
+									Telefone
+								</label>
+
+								<input type="text" id="tel001" name="tel001" class="form-control" maxlength="30" autocomplete="tel">
+
+							</div>
+
+
+							{# Logo #}
+							<div class="mb-3">
+
+								<label for="log001" class="form-label">
+									Logo
+								</label>
+
+								<input type="file" id="log001" name="log001" class="form-control" accept="image/png,image/jpeg,image/webp,image/svg+xml">
+
+								<div class="form-text">
+									A imagem não é armazenada no banco de dados.
+																		                                Apenas o caminho ou endereço da imagem é registrado.
+								</div>
+
+							</div>
+
+						</div>
+
+
+						<div class="card-footer d-flex justify-content-end gap-2">
+
+							<a href="/empresas" class="btn btn-outline-secondary">
+								<i class="bi bi-x-lg me-1"></i>
+								Cancelar
+							</a>
+
+							<button type="submit" class="btn btn-primary">
+								<i class="bi bi-check-lg me-1"></i>
+								Cadastrar Empresa
+							</button>
+
+						</div>
+
+					</form>
+
+				</div>
+
+			</div>
+
+
+			{# Informações #}
+			<div class="col-lg-4">
+
+				<div class="card">
+
+					<div class="card-header">
+						<h3 class="card-title">
+							<i class="bi bi-info-circle me-2"></i>
+							Informações
+						</h3>
+					</div>
+
+					<div class="card-body">
+
+						<p class="mb-3">
+							Os campos marcados com
+							<span class="text-danger">*</span>
+							são obrigatórios.
+						</p>
+
+						<p class="mb-3">
+							A empresa será cadastrada como
+							<strong>ativa</strong>.
+						</p>
+
+						<p class="mb-0 text-muted">
+							O código da empresa será gerado automaticamente
+														                        pelo PostgreSQL.
+						</p>
+
+					</div>
+
+				</div>
+
+			</div>
+
+		</div>
+
+	</div>
+
+{% endblock %}

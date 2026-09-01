@@ -1,0 +1,347 @@
+{% extends 'layouts/adminlte.twig' %}
+
+{% block title %}Configuração da IA | {{ app_name|default('Nexora') }}{% endblock %}
+
+{% block page_title %}Configuração da IA{% endblock %}
+
+{% block content %}
+
+    {% set url = configuracao.url013 is defined
+        ? configuracao.url013
+        : (configuracao.url is defined
+            ? configuracao.url
+            : 'https://api.openai.com/v1')
+    %}
+
+    {% set model = configuracao.mod013 is defined
+        ? configuracao.mod013
+        : (configuracao.model is defined
+            ? configuracao.model
+            : 'gpt-4.1-mini')
+    %}
+
+    {% set temperature = configuracao.temp013 is defined
+        ? configuracao.temp013
+        : (configuracao.temperature is defined
+            ? configuracao.temperature
+            : '0.7')
+    %}
+
+    {% set limit = configuracao.lim013 is defined
+        ? configuracao.lim013
+        : (configuracao.limit is defined
+            ? configuracao.limit
+            : '1000')
+    %}
+
+    {% set session_limit = configuracao.lms013 is defined
+        ? configuracao.lms013
+        : (configuracao.session_limit is defined ? configuracao.session_limit : '8')
+    %}
+
+    {% set ip_limit = configuracao.lmi013 is defined
+        ? configuracao.lmi013
+        : (configuracao.ip_limit is defined ? configuracao.ip_limit : '25')
+    %}
+
+    {% set window_minutes = configuracao.jan013 is defined
+        ? configuracao.jan013
+        : (configuracao.window_minutes is defined ? configuracao.window_minutes : '5')
+    %}
+
+    {% set instruction = configuracao.ins013 is defined
+        ? configuracao.ins013
+        : (configuracao.instruction is defined
+            ? configuracao.instruction
+            : '')
+    %}
+
+    {% set welcome = configuracao.msg013 is defined
+        ? configuracao.msg013
+        : (configuracao.welcome is defined
+            ? configuracao.welcome
+            : '')
+    %}
+
+    {% set farewell = configuracao.msgfim013 is defined
+        ? configuracao.msgfim013
+        : (configuracao.farewell is defined
+            ? configuracao.farewell
+            : '')
+    %}
+
+    {% set active = configuracao.sts013 is defined
+        ? configuracao.sts013
+        : (configuracao.active is defined
+            ? configuracao.active
+            : false)
+    %}
+
+    {% set active_checked = active in [true, 1, '1', 't', 'true'] %}
+
+    <div class="row">
+        <div class="col">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 class="card-title">
+                        <i class="bi bi-cpu me-2"></i>
+                        Configurações da inteligência artificial
+                    </h3>
+
+                    <form method="post" action="/configuracoes/ia/testar">
+                        <button type="submit" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-plug me-1"></i>
+                            Testar conexão
+                        </button>
+                    </form>
+                </div>
+
+                <form method="post" action="/configuracoes/ia">
+                    <div class="card-body">
+
+                        {% if erro %}
+                            <div class="alert alert-danger">
+                                {{ erro }}
+                            </div>
+                        {% endif %}
+
+                        {% if sucesso %}
+                            <div class="alert alert-success">
+                                {{ sucesso }}
+                            </div>
+                        {% endif %}
+
+                        <div class="alert alert-info">
+                            Estas configurações pertencem exclusivamente à empresa
+                            atual. A chave da API é armazenada de forma criptografada.
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-8">
+                                <label for="url013" class="form-label">
+                                    URL da IA
+                                    <i class="bi bi-question-circle ms-1 text-muted" tabindex="0" data-bs-toggle="tooltip" title="Informe a URL base do provedor. Para OpenAI, use https://api.openai.com/v1. O Nexora adiciona /responses automaticamente."></i>
+                                </label>
+
+                                <input
+                                    id="url013"
+                                    type="url"
+                                    name="url013"
+                                    class="form-control"
+                                    maxlength="500"
+                                    required
+                                    value="{{ url }}"
+                                    placeholder="https://api.openai.com/v1"
+                                >
+
+                                <div class="form-text">
+                                    URL base do provedor de IA desta empresa.
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label for="key013" class="form-label">
+                                    Chave da API
+                                    <i class="bi bi-question-circle ms-1 text-muted" tabindex="0" data-bs-toggle="tooltip" title="Cole a chave secreta fornecida pelo provedor de IA. Ela é criptografada antes de ser gravada. Deixe em branco para manter a chave atual."></i>
+                                </label>
+
+                                <input
+                                    id="key013"
+                                    type="password"
+                                    name="key013"
+                                    class="form-control"
+                                    autocomplete="new-password"
+                                    placeholder="{{ configuracao.key_configured|default(0) ? 'Chave já configurada' : 'Informe a chave' }}"
+                                >
+
+                                <div class="form-text">
+                                    {% if configuracao.key_configured|default(0) %}
+                                        Chave configurada. Deixe vazio para mantê-la.
+                                    {% else %}
+                                        A chave será criptografada ao salvar.
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label for="mod013" class="form-label">
+                                    Modelo
+                                    <i class="bi bi-question-circle ms-1 text-muted" tabindex="0" data-bs-toggle="tooltip" title="Informe o identificador do modelo liberado para a chave da empresa, por exemplo gpt-4.1-mini."></i>
+                                </label>
+
+                                <input
+                                    id="mod013"
+                                    type="text"
+                                    name="mod013"
+                                    class="form-control"
+                                    maxlength="100"
+                                    required
+                                    value="{{ model }}"
+                                    placeholder="gpt-4.1-mini"
+                                >
+                            </div>
+
+                            <div class="col-md-3">
+                                <label for="temp013" class="form-label">
+                                    Temperatura
+                                    <i class="bi bi-question-circle ms-1 text-muted" tabindex="0" data-bs-toggle="tooltip" title="Controla a variação das respostas: valores baixos deixam o texto mais previsível; valores altos, mais criativo. Use normalmente entre 0,2 e 0,8."></i>
+                                </label>
+
+                                <input
+                                    id="temp013"
+                                    type="number"
+                                    name="temp013"
+                                    class="form-control"
+                                    min="0"
+                                    max="2"
+                                    step="0.1"
+                                    required
+                                    value="{{ temperature }}"
+                                >
+
+                                <div class="form-text">Entre 0 e 2.</div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label for="lim013" class="form-label">
+                                    Limite de resposta
+                                    <i class="bi bi-question-circle ms-1 text-muted" tabindex="0" data-bs-toggle="tooltip" title="Número máximo de tokens que a IA pode gerar. Limites maiores permitem respostas longas, mas aumentam o consumo. As bases podem substituir este valor."></i>
+                                </label>
+
+                                <input
+                                    id="lim013"
+                                    type="number"
+                                    name="lim013"
+                                    class="form-control"
+                                    min="50"
+                                    max="4000"
+                                    step="1"
+                                    required
+                                    value="{{ limit }}"
+                                >
+
+                                <div class="form-text">Entre 50 e 4000.</div>
+                            </div>
+                        </div>
+
+                        <div class="card card-outline card-secondary mb-3">
+                            <div class="card-header">
+                                <h3 class="card-title">Proteção do Webchat</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <label for="lms013" class="form-label">
+                                            Limite por sessão
+                                            <i class="bi bi-question-circle ms-1 text-muted" tabindex="0" data-bs-toggle="tooltip" title="Quantidade máxima de mensagens que um mesmo visitante pode enviar dentro da janela configurada. Ajuda a evitar abuso e consumo excessivo da IA."></i>
+                                        </label>
+                                        <input id="lms013" type="number" name="lms013" class="form-control" min="1" max="100" required value="{{ session_limit }}">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="lmi013" class="form-label">
+                                            Limite por IP
+                                            <i class="bi bi-question-circle ms-1 text-muted" tabindex="0" data-bs-toggle="tooltip" title="Quantidade máxima somada de mensagens permitida para o mesmo endereço IP dentro da janela. Protege contra várias sessões abertas pela mesma origem."></i>
+                                        </label>
+                                        <input id="lmi013" type="number" name="lmi013" class="form-control" min="1" max="500" required value="{{ ip_limit }}">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="jan013" class="form-label">
+                                            Janela em minutos
+                                            <i class="bi bi-question-circle ms-1 text-muted" tabindex="0" data-bs-toggle="tooltip" title="Período usado para contar os limites de sessão e IP. Por exemplo, 8 mensagens em 5 minutos."></i>
+                                        </label>
+                                        <input id="jan013" type="number" name="jan013" class="form-control" min="1" max="60" required value="{{ window_minutes }}">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="ins013" class="form-label">
+                                Instruções para a IA
+                                <i class="bi bi-question-circle ms-1 text-muted" tabindex="0" data-bs-toggle="tooltip" title="Defina tom de voz e regras gerais da empresa. Uma base de aprendizado pode ter instruções próprias; quando tiver, elas substituem este texto."></i>
+                            </label>
+
+                            <textarea
+                                id="ins013"
+                                name="ins013"
+                                class="form-control"
+                                rows="6"
+                                placeholder="Defina como a IA deve responder aos clientes."
+                            >{{ instruction }}</textarea>
+
+                            <div class="form-text">
+                                Informe o comportamento, tom de voz e regras da IA.
+                            </div>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="msg013" class="form-label">
+                                    Mensagem de boas-vindas
+                                    <i class="bi bi-question-circle ms-1 text-muted" tabindex="0" data-bs-toggle="tooltip" title="Mensagem exibida no início do atendimento quando o canal utilizar uma saudação automática."></i>
+                                </label>
+
+                                <textarea
+                                    id="msg013"
+                                    name="msg013"
+                                    class="form-control"
+                                    rows="3"
+                                    placeholder="Olá! Como posso ajudar?"
+                                >{{ welcome }}</textarea>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="msgfim013" class="form-label">
+                                    Mensagem de encerramento
+                                    <i class="bi bi-question-circle ms-1 text-muted" tabindex="0" data-bs-toggle="tooltip" title="Mensagem usada ao encerrar um atendimento quando o canal utilizar uma despedida automática."></i>
+                                </label>
+
+                                <textarea
+                                    id="msgfim013"
+                                    name="msgfim013"
+                                    class="form-control"
+                                    rows="3"
+                                    placeholder="Obrigado pelo contato!"
+                                >{{ farewell }}</textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-check form-switch mt-4">
+                            <input
+                                id="sts013"
+                                type="checkbox"
+                                name="sts013"
+                                class="form-check-input"
+                                value="1"
+                                {% if active_checked %}checked{% endif %}
+                            >
+
+                            <label for="sts013" class="form-check-label">
+                                Configuração da IA ativa
+                                <i class="bi bi-question-circle ms-1 text-muted" tabindex="0" data-bs-toggle="tooltip" title="Desative para impedir novas respostas automáticas da IA desta empresa, sem apagar as configurações salvas."></i>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="card-footer text-end">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-lg me-1"></i>
+                            Salvar configuração
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (element) {
+            new bootstrap.Tooltip(element);
+        });
+    </script>
+{% endblock %}

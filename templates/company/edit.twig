@@ -1,0 +1,375 @@
+{% extends 'layouts/adminlte.twig' %}
+
+{% block title %}
+	Editar Empresa | {{ app_name }}
+{% endblock %}
+
+{% block page_title %}
+	Editar Empresa
+{% endblock %}
+
+{% block content %}
+
+	<div
+		class="container-fluid">
+
+		{# =========================================================
+						       Cabeçalho
+						       ========================================================= #}
+
+		<div class="row mb-3">
+
+			<div class="col-12">
+
+				<div class="d-flex justify-content-between align-items-center">
+
+					<div>
+
+						<h4 class="mb-1">
+
+							<i class="bi bi-building-gear me-2"></i>
+
+							Editar Empresa
+
+						</h4>
+
+						<p class="text-muted mb-0">
+
+							Altere os dados cadastrais da empresa.
+
+						</p>
+
+					</div>
+
+					<div>
+
+						<a href="/empresas/{{ empresa.cod001 }}" class="btn btn-outline-secondary">
+
+							<i class="bi bi-arrow-left me-1"></i>
+
+							Voltar
+
+						</a>
+
+					</div>
+
+				</div>
+
+			</div>
+
+		</div>
+
+
+		{# =========================================================
+						       Mensagem de erro
+						       ========================================================= #}
+
+		{% if erro %}
+
+			<div class="row mb-3">
+
+				<div class="col-12">
+
+					<div class="alert alert-danger alert-dismissible fade show" role="alert">
+
+						<i class="bi bi-exclamation-triangle me-2"></i>
+
+						{{ erro }}
+
+						<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+
+					</div>
+
+				</div>
+
+			</div>
+
+		{% endif %}
+
+
+		{# =========================================================
+		Formulário
+		========================================================= #}
+
+		<div class="row">
+
+			<div class="col-lg-8">
+
+				<div class="card">
+
+					<div class="card-header">
+
+						<h3 class="card-title">
+
+							<i class="bi bi-building me-2"></i>
+
+							Dados da Empresa
+
+						</h3>
+
+					</div>
+
+
+					<form method="post" action="/empresas/{{ empresa.cod001 }}" enctype="multipart/form-data">
+
+						<div
+							class="card-body">
+
+							{# Código #}
+
+							<div class="mb-3">
+
+								<label for="cod001" class="form-label">
+									Código
+								</label>
+
+								<input type="text" id="cod001" class="form-control" value="{{ empresa.cod001 }}" readonly>
+
+								<div class="form-text">
+
+									O código da empresa não pode ser alterado.
+
+								</div>
+
+							</div>
+
+
+							{# Nome #}
+
+							<div class="mb-3">
+
+								<label for="des001" class="form-label">
+
+									Nome / Razão Social
+
+									<span class="text-danger">*</span>
+
+								</label>
+
+								<input type="text" id="des001" name="des001" class="form-control" maxlength="150" required autocomplete="organization" value="{{ dados.des001|default(empresa.des001)|e }}">
+
+							</div>
+
+
+							{# Documento #}
+
+							<div class="mb-3">
+
+								<label for="doc001" class="form-label">
+
+									Documento
+
+								</label>
+
+								<input type="text" id="doc001" name="doc001" class="form-control" maxlength="30" autocomplete="off" value="{{ dados.doc001|default(empresa.doc001)|e }}">
+
+								<div class="form-text">
+
+									CNPJ ou outro documento de identificação.
+
+								</div>
+
+							</div>
+
+
+							{# E-mail #}
+
+							<div class="mb-3">
+
+								<label for="ema001" class="form-label">
+
+									E-mail
+
+									<span class="text-danger">*</span>
+
+								</label>
+
+								<input type="email" id="ema001" name="ema001" class="form-control" maxlength="255" required autocomplete="email" value="{{ dados.ema001|default(empresa.ema001)|e }}">
+
+							</div>
+
+
+							{# Telefone #}
+
+							<div class="mb-3">
+
+								<label for="tel001" class="form-label">
+
+									Telefone
+
+								</label>
+
+								<input type="text" id="tel001" name="tel001" class="form-control" maxlength="30" autocomplete="tel" value="{{ dados.tel001|default(empresa.tel001)|e }}">
+
+							</div>
+
+
+							{# Logo #}
+
+							<div class="mb-3">
+
+								<label for="log001" class="form-label">
+
+									Logo
+
+								</label>
+
+								{# Logo #}
+								<div class="mb-3">
+
+									<label for="log001" class="form-label">
+										Logo
+									</label>
+
+									{% if empresa.log001 %}
+										<div class="mb-2">
+											<img src="{{ empresa.log001 }}" alt="Logo da empresa" class="img-thumbnail" style="max-height: 100px; max-width: 200px;">
+										</div>
+									{% endif %}
+
+									<input type="file" id="log001" name="log001" class="form-control" accept="image/png,image/jpeg,image/webp,image/svg+xml">
+
+									<div class="form-text">
+										Selecione uma nova imagem para substituir a logo atual.
+																														        Formatos aceitos: PNG, JPG, JPEG, WEBP ou SVG.
+									</div>
+
+								</div>
+
+								<div class="form-text">
+
+									Apenas o caminho ou endereço da imagem é registrado.
+
+								</div>
+
+							</div>
+
+
+							{# Status #}
+
+							<div class="mb-3">
+								{% if is_admin %}
+
+								<label class="form-label">
+
+									Status
+
+								</label>
+
+								<div class="form-check form-switch">
+
+									<input class="form-check-input" type="checkbox" role="switch" id="sts001" name="sts001" value="1" {% if dados.sts001|default(empresa.sts001) %} checked {% endif %}>
+
+									<label class="form-check-label" for="sts001">
+
+										Empresa ativa
+
+									</label>
+
+								</div>
+
+								<div class="form-text">
+
+									Empresas inativas não devem ser utilizadas para novos atendimentos.
+
+								</div>
+								{% else %}
+									<label class="form-label">Status</label>
+									<p class="mb-1">{{ empresa.sts001 ? 'Empresa ativa' : 'Empresa inativa' }}</p>
+									<div class="form-text">Somente o Administrador pode ativar ou desativar a empresa.</div>
+								{% endif %}
+
+							</div>
+
+						</div>
+
+
+						{# =================================================
+																		                       Rodapé
+																		                       ================================================= #}
+
+						<div class="card-footer d-flex justify-content-end gap-2">
+
+							<a href="/empresas/{{ empresa.cod001 }}" class="btn btn-outline-secondary">
+
+								<i class="bi bi-x-lg me-1"></i>
+
+								Cancelar
+
+							</a>
+
+
+							<button type="submit" class="btn btn-primary">
+
+								<i class="bi bi-check-lg me-1"></i>
+
+								Salvar Alterações
+
+							</button>
+
+						</div>
+
+					</form>
+
+				</div>
+
+			</div>
+
+
+			{# =========================================================
+									           Informações
+									           ========================================================= #}
+
+			<div class="col-lg-4">
+
+				<div class="card">
+
+					<div class="card-header">
+
+						<h3 class="card-title">
+
+							<i class="bi bi-info-circle me-2"></i>
+
+							Informações
+
+						</h3>
+
+					</div>
+
+					<div class="card-body">
+
+						<p class="mb-3">
+
+							Os campos marcados com
+
+							<span class="text-danger">*</span>
+
+							são obrigatórios.
+
+						</p>
+
+						<p class="mb-3">
+
+							O código da empresa é gerado automaticamente
+																					                        e não pode ser alterado.
+
+						</p>
+
+						<p class="mb-0 text-muted">
+
+							As alterações serão registradas na empresa
+																					                        correspondente ao código informado.
+
+						</p>
+
+					</div>
+
+				</div>
+
+			</div>
+
+		</div>
+
+	</div>
+
+{% endblock %}

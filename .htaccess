@@ -1,0 +1,18 @@
+Options -Indexes
+RewriteEngine On
+
+# Bloqueia acesso direto ao código, configurações e dados internos.
+RewriteRule ^(?:App|Config|Database|Resources|routes|Storage|templates|Tests|vendor|Public|uploads|doc's)(?:/|$) - [F,L,NC]
+
+# Bloqueia arquivos sensíveis da raiz.
+<FilesMatch "^(?:\.env(?:\..*)?|composer\.(?:json|lock)|phpunit\.xml|phpstan\.neon|test\.bat)$">
+    Require all denied
+</FilesMatch>
+
+# Libera os arquivos estáticos públicos.
+RewriteRule ^assets/(.+)$ Public/assets/$1 [L,NC]
+
+# Encaminha as demais URLs para o Slim.
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.php [QSA,L]

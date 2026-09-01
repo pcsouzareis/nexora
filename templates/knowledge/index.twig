@@ -1,0 +1,71 @@
+{% extends 'layouts/adminlte.twig' %}
+{% block title %}Aprendizado da IA | {{ app_name }}
+{% endblock %}
+{% block page_title %}Aprendizado da IA
+{% endblock %}
+{% block content %}
+	<div class="d-flex justify-content-between align-items-center mb-3">
+		<div>
+			<h4 class="mb-1">
+				<i class="bi bi-book me-2"></i>Bases de conhecimento</h4>
+			<p class="text-muted mb-0">Conteúdos que serão usados pela IA da empresa.</p>
+		</div>
+	</div>
+	{% if can_manage %}
+		<div class="card mb-3">
+			<form method="post" action="/conhecimento">
+				<div class="card-body">
+					<div class="row g-3 align-items-end">
+						<div class="col-md-3">
+							<label class="form-label">Empresa atual</label>
+							<input
+								type="text"
+								class="form-control"
+								value="{{ empresa_atual.des001|default('Empresa não selecionada') }}"
+								readonly
+							>
+						</div>
+
+						<div class="col-md-6">
+							<label for="des005" class="form-label">Nome da nova base</label>
+							<input id="des005" name="des005" class="form-control" maxlength="120" required>
+						</div>
+
+						<div class="col-md-2">
+							<label for="sts005" class="form-label">Status</label>
+							<select id="sts005" name="sts005" class="form-select">
+								<option value="1" selected>Ativa</option>
+								<option value="0">Inativa</option>
+							</select>
+						</div>
+
+						<div class="col-md-1 d-grid">
+							<button class="btn btn-primary text-nowrap">Criar</button>
+						</div>
+					</div>
+				</div>
+			</form>
+		</div>
+	{% endif %}
+	<div class="card">
+		<div class="list-group list-group-flush">
+			{% for base in bases %}
+				<a class="list-group-item list-group-item-action d-flex align-items-center" href="/conhecimento/{{ base.cod005 }}">
+					<span class="badge text-bg-{{ base.sts005 ? 'success' : 'secondary' }} me-3">
+						{{ base.sts005 ? 'Ativa' : 'Inativa' }}
+					</span>
+					<span class="flex-grow-1">
+						<strong>{{ base.des005 }}</strong>
+						<small class="d-block text-muted">
+							<i class="bi bi-building me-1"></i>{{ base.empresa }}
+						</small>
+						<small class="d-block text-muted">{{ base.artigos }}
+							artigo(s) ativo(s)</small>
+					</span>
+				</a>
+			{% else %}
+				<div class="p-4 text-center text-muted">Nenhuma base de conhecimento cadastrada.</div>
+			{% endfor %}
+		</div>
+	</div>
+{% endblock %}

@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ channel.empresa }} — Atendimento</title>
+    <link rel="icon" href="/assets/images/favicon-nexora.ico" sizes="any">
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; background: #f4f6f9; font: 14px/1.45 system-ui, sans-serif; color: #212529; }
+        .chat { max-width: 680px; min-height: 100vh; margin: auto; display: flex; flex-direction: column; background: #fff; }
+        header { background: #0d6efd; color: #fff; padding: 18px 20px; }
+        header strong, header small { display: block; } header small { opacity: .8; }
+        #messages { flex: 1; padding: 18px; overflow-y: auto; }
+        .message { max-width: 82%; margin: 0 0 12px; padding: 10px 13px; border-radius: 12px; white-space: pre-wrap; }
+        .Cliente { background: #f1f3f5; margin-right: auto; }
+        .Chatbot { background: #dbeafe; margin-left: auto; }
+        .Atendente { background: #0d6efd; color: #fff; margin-left: auto; }
+        .meta { display: block; font-size: 11px; opacity: .7; margin-bottom: 3px; }
+        form { border-top: 1px solid #dee2e6; padding: 12px; display: flex; gap: 8px; }
+        textarea { flex: 1; resize: none; min-height: 42px; max-height: 120px; padding: 10px; border: 1px solid #ced4da; border-radius: 8px; font: inherit; }
+        button { background: #0d6efd; color: white; border: 0; border-radius: 8px; padding: 0 16px; cursor: pointer; }
+        button:disabled { opacity: .6; cursor: wait; }
+        #notice { padding: 8px 18px; color: #6c757d; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <main class="chat">
+        <header><strong>{{ channel.empresa }}</strong><small>{{ channel.des003 }}</small></header>
+        <div id="messages"></div>
+        <div id="notice">{{ channel.welcome }}</div>
+        <form id="form">
+            <textarea id="message" maxlength="10000" required placeholder="Digite sua mensagem..."></textarea>
+            <button id="send" type="submit">Enviar</button>
+        </form>
+        <div style="padding: 0 12px 12px; text-align: right;"><button id="close" type="button" style="background:none; color:#6c757d; padding:0; text-decoration:underline;">Encerrar atendimento</button></div>
+    </main>
+    <script>
+        const token = '{{ channel_token|e('js') }}';
+        const storageKey = 'nexora-webchat-' + token;
+        let sessionId = localStorage.getItem(storageKey);
+        if (!sessionId) {
+            const bytes = new Uint8Array(24);
+            crypto.getRandomValues(bytes);
+            sessionId = Array.from(bytes, byte => byte.toString(16).padStart(2, '0')).join('');
+            localStorage.setItem(storageKey, sessionId);
+        }
+        const messages = document.getElementById('messages');
+        const form = document.getElementById('form');
+        const input = document.getElementById('message');
+        const send = document.getElementById('send');
+        const notice = document.getElementById('notice');
+
+        function render(items) {
+            messages.innerHTML = '';
+            items.forEach(item => {
+                const bubble = document.createElement('div');
+                bubble.className = 'message ' + item.ori009;
+                const meta = document.createElement('span');
+                meta.className = 'meta';
+                meta.textContent = item.ori009;
+                bubble.append(meta, document.createTextNode(item.con009 || ''));
+                messages.appendChild(bubble);
+            });
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        async function loadMessages() {
+            const response = await fetch('/api/webchat/' + encodeURIComponent(token) + '/mensagens/' + encodeURIComponent(sessionId));
+            if (response.ok) {
+                const data = await response.json();
+                render(data.messages || []);
+                if (data.human_handling) notice.textContent = 'Um atendente assumiu esta conversa. A IA está pausada.';
+                if (data.status === 'Encerrada' || data.status === 'Cancelada') {
+                    notice.textContent = 'Este atendimento foi encerrado.';
+                    input.disabled = true; send.disabled = true;
+                }
+            }
+        }
+
+        form.addEventListener('submit', async event => {
+            event.preventDefault();
+            const message = input.value.trim();
+            if (!message) return;
+            send.disabled = true;
+            notice.textContent = 'Enviando mensagem...';
+            try {
+                const response = await fetch('/api/webchat/' + encodeURIComponent(token) + '/mensagens', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ session_id: sessionId, message })
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Não foi possível enviar.');
+                input.value = '';
+                notice.textContent = data.human_handling
+                    ? 'Mensagem recebida. Um atendente dará continuidade.'
+                    : (data.processed === false
+                    ? 'Mensagem recebida. Aguarde uma resposta.'
+                    : '');
+                await loadMessages();
+            } catch (error) {
+                notice.textContent = error.message || 'Não foi possível enviar a mensagem.';
+            } finally {
+                send.disabled = false;
+                input.focus();
+            }
+        });
+
+        loadMessages();
+        setInterval(loadMessages, 5000);
+
+        document.getElementById('close').addEventListener('click', async () => {
+            if (!confirm('Deseja encerrar este atendimento?')) return;
+            const response = await fetch('/api/webchat/' + encodeURIComponent(token) + '/encerrar', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ session_id: sessionId })
+            });
+            if (response.ok) await loadMessages();
+        });
+    </script>
+</body>
+</html>

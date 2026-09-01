@@ -1,0 +1,24 @@
+ALTER TABLE n003
+    ADD COLUMN IF NOT EXISTS imh003 VARCHAR(255),
+    ADD COLUMN IF NOT EXISTS imp003 INTEGER,
+    ADD COLUMN IF NOT EXISTS ime003 VARCHAR(10),
+    ADD COLUMN IF NOT EXISTS imu003 VARCHAR(255),
+    ADD COLUMN IF NOT EXISTS imw003 TEXT,
+    ADD COLUMN IF NOT EXISTS smh003 VARCHAR(255),
+    ADD COLUMN IF NOT EXISTS smp003 INTEGER,
+    ADD COLUMN IF NOT EXISTS sme003 VARCHAR(10),
+    ADD COLUMN IF NOT EXISTS smu003 VARCHAR(255),
+    ADD COLUMN IF NOT EXISTS smw003 TEXT,
+    ADD COLUMN IF NOT EXISTS outema003 BOOLEAN NOT NULL DEFAULT FALSE;
+
+COMMENT ON COLUMN n003.imh003 IS 'Servidor IMAP do canal de e-mail.';
+COMMENT ON COLUMN n003.imp003 IS 'Porta IMAP do canal de e-mail.';
+COMMENT ON COLUMN n003.ime003 IS 'Segurança IMAP: ssl, tls ou none.';
+COMMENT ON COLUMN n003.imu003 IS 'Usuário IMAP do canal de e-mail.';
+COMMENT ON COLUMN n003.imw003 IS 'Senha IMAP criptografada.';
+COMMENT ON COLUMN n003.smh003 IS 'Servidor SMTP do canal de e-mail.';
+COMMENT ON COLUMN n003.smp003 IS 'Porta SMTP do canal de e-mail.';
+COMMENT ON COLUMN n003.sme003 IS 'Segurança SMTP: ssl, tls ou none.';
+COMMENT ON COLUMN n003.smu003 IS 'Usuário SMTP do canal de e-mail.';
+COMMENT ON COLUMN n003.smw003 IS 'Senha SMTP criptografada.';
+COMMENT ON COLUMN n003.outema003 IS 'Define se respostas do Nexora serão enviadas pelo SMTP.';

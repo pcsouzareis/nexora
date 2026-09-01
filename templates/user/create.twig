@@ -1,0 +1,59 @@
+{% extends 'layouts/adminlte.twig' %}
+
+{% block title %}Novo usuário | {{ app_name }}
+{% endblock %}
+{% block page_title %}Novo usuário
+{% endblock %}
+
+{% block content %}
+	<div class="d-flex justify-content-between align-items-center mb-3">
+		<div>
+			<h4 class="mb-1">Cadastrar usuário</h4>
+			<p class="text-muted mb-0">Defina os dados de acesso e o perfil.</p>
+		</div>
+		<a href="/usuarios" class="btn btn-outline-secondary">Voltar</a>
+	</div>
+	{% if erro %}
+		<div class="alert alert-danger">{{ erro }}</div>
+	{% endif %}
+	<div class="card">
+		<form method="post" action="/usuarios">
+			<div class="card-body">
+				<div class="row g-3">
+					<div class="col-md-6">
+						<label class="form-label" for="cod001">Empresa</label>
+						<select id="cod001" name="cod001" class="form-select" required>
+							{% for empresa in empresas %}
+								<option value="{{ empresa.cod001 }}" {% if dados.cod001|default(0) == empresa.cod001 %} selected {% endif %}>{{ empresa.des001 }}</option>
+							{% endfor %}
+						</select>
+					</div>
+					<div class="col-md-6">
+						<label class="form-label" for="rol002">Perfil</label>
+						<select id="rol002" name="rol002" class="form-select" required>
+							{% for codigo, perfil in perfis %}
+								<option value="{{ codigo }}" {% if dados.rol002|default('A') == codigo %} selected {% endif %}>{{ perfil }}</option>
+							{% endfor %}
+						</select>
+					</div>
+					<div class="col-md-6">
+						<label class="form-label" for="des002">Nome</label><input id="des002" name="des002" class="form-control" maxlength="150" value="{{ dados.des002|default('')|e }}" required></div>
+					<div class="col-md-6">
+						<label class="form-label" for="ema002">E-mail</label><input type="email" id="ema002" name="ema002" class="form-control" maxlength="255" value="{{ dados.ema002|default('')|e }}" required></div>
+		<div>
+			<p class="text-muted mb-0">Senha inicial e igual ao código do usuário</p>
+		</div>                        
+					{# <div class="col-md-6"><label class="form-label" for="sen002">Senha</label><input type="password" id="sen002" name="sen002" class="form-control" minlength="8" required></div>
+					        <div class="col-md-6"><label class="form-label" for="sen002_confirmacao">Confirmar senha</label><input type="password" id="sen002_confirmacao" name="sen002_confirmacao" class="form-control" minlength="8" required></div> #}
+					<div class="col-12">
+						<div class="form-check form-switch"><input class="form-check-input" type="checkbox" role="switch" id="sts002" name="sts002" value="1" {% if dados.sts002|default(true) %} checked {% endif %}><label class="form-check-label" for="sts002">Usuário ativo</label>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="card-footer text-end">
+				<button class="btn btn-primary" type="submit">Salvar usuário</button>
+			</div>
+		</form>
+	</div>
+{% endblock %}

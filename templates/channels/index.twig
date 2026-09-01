@@ -1,0 +1,9 @@
+{% extends 'layouts/adminlte.twig' %}
+{% block title %}Canais | {{ app_name }}{% endblock %}
+{% block page_title %}Canais{% endblock %}
+{% block content %}
+<div class="card"><div class="card-header d-flex justify-content-between align-items-center"><h3 class="card-title"><i class="bi bi-broadcast me-2"></i>Canais da empresa atual</h3>{% if can_create %}<a class="btn btn-primary btn-sm" href="/canais/novo">Novo canal</a>{% endif %}</div>
+<div class="table-responsive"><table class="table table-hover mb-0"><thead><tr><th>Canal</th><th>Tipo</th><th>Base padrão</th><th>Webhook</th><th>Status</th><th></th></tr></thead><tbody>
+{% for canal in canais %}<tr><td>{{ canal.des003 }}</td><td>{{ canal.tip003 }}</td><td>{{ canal.base|default('—') }}</td><td>{{ canal.webhook_configured ? 'Configurado' : '—' }}</td><td><span class="badge text-bg-{{ canal.sts003 ? 'success' : 'secondary' }}">{{ canal.sts003 ? 'Ativo' : 'Inativo' }}</span></td><td><a class="btn btn-outline-secondary btn-sm" href="/canais/{{ canal.cod003 }}">Abrir</a></td></tr>{% else %}<tr><td colspan="6" class="text-center text-muted p-4">Nenhum canal cadastrado.</td></tr>{% endfor %}
+</tbody></table></div></div>
+{% endblock %}

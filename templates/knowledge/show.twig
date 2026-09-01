@@ -1,0 +1,246 @@
+{% extends 'layouts/adminlte.twig' %}
+{% block title %}
+	{{ base.des005 }}
+	| {{ app_name }}
+{% endblock %}
+{% block page_title %}Base de conhecimento
+{% endblock %}
+{% block content %}
+	<div class="d-flex justify-content-between align-items-center mb-3">
+		<div>
+			<h4 class="mb-1">{{ base.des005 }}</h4>
+			<p class="text-muted mb-0">Artigos que orientam as respostas da IA.</p>
+		</div>
+		<a href="/conhecimento" class="btn btn-outline-secondary">Voltar</a>
+	</div>
+	{% if can_manage %}
+		<div class="card mb-3">
+			{% if can_manage %}
+				<form method="post" action="/conhecimento/{{ base.cod005 }}/status" class="mb-3">
+					<div class="input-group" style="max-width: 270px;">
+						<span class="input-group-text">Status</span>
+
+						<select name="sts005" class="form-select">
+							<option value="1" {% if base.sts005 %} selected {% endif %}>
+								Ativa
+							</option>
+
+							<option value="0" {% if not base.sts005 %} selected {% endif %}>
+								Inativa
+							</option>
+						</select>
+
+						<button class="btn btn-outline-primary">
+							Salvar
+						</button>
+					</div>
+				</form>
+			{% endif %}
+			<div class="card-header">Novo artigo</div>
+			<form method="post" action="/conhecimento/{{ base.cod005 }}/artigos">
+				<div class="card-body">
+					<div class="row g-3">
+						<div class="col-md-8">
+							<label class="form-label">Título</label><input name="tit006" class="form-control" maxlength="200" required>
+						</div>
+						<div class="col">
+							<label class="form-label">Visibilidade</label>
+							<select name="vis006" class="form-select">
+								<option value="1">Público</option>
+								<option value="2" selected>Interno</option>
+								<option value="3">Restrito</option>
+							</select>
+						</div>
+						<div class="col">
+							<label class="form-label">Status</label>
+
+							<select name="sts006" class="form-select">
+								<option value="1" selected>Ativo</option>
+								<option value="0">Inativo</option>
+							</select>
+						</div>
+						<div class="col-12">
+							<label class="form-label">Conteúdo</label>
+							<textarea name="con006" class="form-control" rows="5" required></textarea>
+						</div>
+						<div class="col-12">
+							<label class="form-label">URL da fonte (opcional)</label><input type="url" name="url006" class="form-control" maxlength="500"></div>
+					</div>
+				</div>
+				<div class="card-footer text-end">
+					<button class="btn btn-primary">Adicionar artigo</button>
+				</div>
+			</form>
+			{% if can_manage %}
+    <div class="card mb-3">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span>Configuração da IA desta base</span>
+            <button
+                class="btn btn-outline-secondary btn-sm"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#configuracao-ia-base-{{ base.cod005 }}"
+                aria-expanded="false"
+                aria-controls="configuracao-ia-base-{{ base.cod005 }}"
+            >
+                <i class="bi bi-sliders me-1"></i>
+                Exibir configurações
+            </button>
+        </div>
+
+        <div class="collapse" id="configuracao-ia-base-{{ base.cod005 }}">
+            <form
+                method="post"
+                action="/conhecimento/{{ base.cod005 }}/configuracao-ia"
+            >
+            <div class="card-body">
+                <div class="alert alert-info">
+                    Campos vazios utilizam a configuração padrão da empresa.
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label for="mod005" class="form-label">Modelo</label>
+
+                        <input
+                            id="mod005"
+                            type="text"
+                            name="mod005"
+                            class="form-control"
+                            maxlength="100"
+                            value="{{ base.mod005|default('') }}"
+                            placeholder="Usar padrão da empresa"
+                        >
+                    </div>
+
+                    <div class="col-md-3">
+                        <label for="tmp005" class="form-label">
+                            Temperatura
+                        </label>
+
+                        <input
+                            id="tmp005"
+                            type="number"
+                            name="tmp005"
+                            class="form-control"
+                            min="0"
+                            max="2"
+                            step="0.1"
+                            value="{{ base.tmp005 is not null ? base.tmp005 : '' }}"
+                            placeholder="Padrão"
+                        >
+                    </div>
+
+                    <div class="col-md-3">
+                        <label for="lim005" class="form-label">
+                            Limite de resposta
+                        </label>
+
+                        <input
+                            id="lim005"
+                            type="number"
+                            name="lim005"
+                            class="form-control"
+                            min="50"
+                            max="4000"
+                            value="{{ base.lim005 is not null ? base.lim005 : '' }}"
+                            placeholder="Padrão"
+                        >
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="ins005" class="form-label">
+                        Instruções específicas
+                    </label>
+
+                    <textarea
+                        id="ins005"
+                        name="ins005"
+                        class="form-control"
+                        rows="5"
+                        placeholder="Ex.: responda como suporte técnico, de forma objetiva e passo a passo."
+                    >{{ base.ins005|default('') }}</textarea>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="msg005" class="form-label">
+                            Mensagem inicial
+                        </label>
+
+                        <textarea
+                            id="msg005"
+                            name="msg005"
+                            class="form-control"
+                            rows="3"
+                            placeholder="Usar padrão da empresa"
+                        >{{ base.msg005|default('') }}</textarea>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="msgfim005" class="form-label">
+                            Mensagem final
+                        </label>
+
+                        <textarea
+                            id="msgfim005"
+                            name="msgfim005"
+                            class="form-control"
+                            rows="3"
+                            placeholder="Usar padrão da empresa"
+                        >{{ base.msgfim005|default('') }}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-footer text-end">
+                <button class="btn btn-outline-primary">
+                    Salvar configuração da base
+                </button>
+            </div>
+            </form>
+        </div>
+    </div>
+{% endif %}
+		</div>
+	{% endif %}
+	<div class="card">
+		<div class="list-group list-group-flush">
+			{% for artigo in artigos %}
+				<div class="list-group-item">
+					<div class="d-flex justify-content-between">
+						<strong>{{ artigo.tit006 }}</strong>
+						<span class="badge text-bg-secondary">{{ {1:'Público',2:'Interno',3:'Restrito'}[artigo.vis006] }}</span>
+					</div>
+					<p class="mb-1 mt-2">{{ artigo.con006 }}</p>
+					{% if artigo.url006 %}
+						<a href="{{ artigo.url006 }}" target="_blank" rel="noopener">Fonte</a>
+					{% endif %}
+					{% if can_manage %}
+						<form method="post" action="/conhecimento/{{ base.cod005 }}/artigos/{{ artigo.cod006 }}/status" class="mt-2">
+							<div class="input-group input-group-sm" style="max-width: 220px;">
+								<select name="sts006" class="form-select">
+									<option value="1" {% if artigo.sts006 %} selected {% endif %}>
+										Ativo
+									</option>
+
+									<option value="0" {% if not artigo.sts006 %} selected {% endif %}>
+										Inativo
+									</option>
+								</select>
+
+								<button class="btn btn-outline-primary">
+									Salvar
+								</button>
+							</div>
+						</form>
+					{% endif %}
+				</div>
+
+			{% else %}
+				<div class="p-4 text-center text-muted">Nenhum artigo cadastrado.</div>
+			{% endfor %}
+		</div>
+	</div>
+{% endblock %}

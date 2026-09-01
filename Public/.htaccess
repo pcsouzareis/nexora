@@ -1,0 +1,7 @@
+RewriteEngine On
+
+Options -Indexes
+
+# Arquivos existentes são servidos normalmente
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^ - [L]

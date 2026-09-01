@@ -1,0 +1,86 @@
+{% extends 'layouts/adminlte.twig' %}
+
+{% block title %}Conversas | {{ app_name }}{% endblock %}
+{% block page_title %}Conversas{% endblock %}
+
+{% block content %}
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h3 class="card-title"><i class="bi bi-chat-dots me-2"></i>Atendimentos da empresa atual</h3>
+            <div class="d-flex gap-2"><span class="badge text-bg-warning">{{ fila.aguardando }} aguardando</span><span class="badge text-bg-primary">{{ fila.em_atendimento }} em atendimento</span></div>
+        </div>
+        <div class="card-body border-bottom">
+            <form method="get" action="/conversas" class="row g-2">
+                <div class="col-md-2 d-flex align-items-end">
+                    <button class="btn btn-outline-primary"><i class="bi bi-funnel me-1"></i>Filtrar</button>
+                </div>
+                <div class="col-md-3">
+                    <select name="status" class="form-select">
+                        <option value="">Todos os status</option>
+                        {% for status in status_opcoes %}
+                            <option value="{{ status }}" {% if status_atual == status %}selected{% endif %}>{{ status }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <input name="q" class="form-control" value="{{ busca }}" placeholder="Buscar por cliente, telefone ou identificador da conversa">
+                </div>
+                <div class="col-md-3">
+                    <div class="input-group date-picker-group"><input type="text" name="inicio" class="form-control date-br" value="{{ inicio }}" placeholder="dd/mm/aaaa" inputmode="numeric" maxlength="10" aria-label="Data de início"><input class="date-native" type="date" tabindex="-1" aria-hidden="true"><button class="btn btn-outline-secondary date-picker-button" type="button" aria-label="Selecionar data"><i class="bi bi-calendar3"></i></button></div>
+                </div>
+            </form>
+        </div>
+        <div class="list-group list-group-flush">
+            {% for conversa in conversas %}
+                <a class="list-group-item list-group-item-action" href="/conversas/{{ conversa.cod008 }}">
+                    <div class="d-flex justify-content-between align-items-start gap-3">
+                        <div class="flex-grow-1 overflow-hidden">
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <strong>{{ conversa.cliente }}</strong>{% if conversa.cliente_online %}<span class="badge text-bg-success ms-1">Online</span>{% endif %}
+                                <span class="badge text-bg-{{ conversa.sts008 == 'Encerrada' or conversa.sts008 == 'Cancelada' ? 'secondary' : (conversa.sts008 == 'Aguardando' ? 'warning' : (conversa.sts008 == 'Em Atendimento' ? 'primary' : 'success')) }}">{{ conversa.sts008 }}</span>
+                            </div>
+                            <small class="text-muted d-block">
+                                <i class="bi bi-broadcast me-1"></i>{{ conversa.canal }}
+                                {% if conversa.base %} · <i class="bi bi-book me-1"></i>{{ conversa.base }}{% endif %}
+                                {% if conversa.atendente %} · <i class="bi bi-person me-1"></i>{{ conversa.atendente }}{% endif %}
+                            </small>
+                            <span class="d-block text-truncate mt-1">{{ conversa.ultima_mensagem|default('Sem mensagens') }}</span>
+                        </div>
+                        <small class="text-muted text-nowrap text-end">#{{ conversa.cod008 }}<br>Início: {{ conversa.ini008|date('d/m/Y H:i') }}</small>
+                    </div>
+                </a>
+            {% else %}
+                <div class="p-5 text-center text-muted">
+                    <i class="bi bi-chat-square-text fs-2 d-block mb-2"></i>Nenhuma conversa encontrada.
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.date-picker-group').forEach(function (group) {
+        const input = group.querySelector('.date-br'), native = group.querySelector('.date-native');
+        native.style.cssText = 'position:absolute;opacity:0;width:1px;height:1px;pointer-events:none;';
+        input.addEventListener('input', function () { const digits = input.value.replace(/\D/g, '').slice(0, 8); input.value = digits.replace(/^(\d{2})(\d)/, '$1/$2').replace(/^(\d{2}\/\d{2})(\d)/, '$1/$2'); });
+        group.querySelector('.date-picker-button').addEventListener('click', function () { if (typeof native.showPicker === 'function') native.showPicker(); else native.focus(); });
+        native.addEventListener('change', function () { if (native.value) { const parts = native.value.split('-'); input.value = parts[2] + '/' + parts[1] + '/' + parts[0]; } });
+    });
+    let lastUpdate = {{ fila.ultima_atualizacao|json_encode|raw }};
+    let waiting = {{ fila.aguardando|default(0) }};
+    window.setInterval(function () {
+        fetch('/conversas/resumo', {headers: {'Accept': 'application/json'}})
+            .then(function (response) { return response.ok ? response.json() : null; })
+            .then(function (summary) {
+                if (!summary) return;
+                if (summary.ultima_atualizacao !== lastUpdate || Number(summary.aguardando) !== Number(waiting)) {
+                    window.location.reload();
+                }
+            })
+            .catch(function () {});
+    }, 15000);
+});
+</script>
+{% endblock %}

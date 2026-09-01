@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+	<head>
+
+		<meta charset="utf-8">
+
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+
+		<title>
+			{% block title %}
+				{{ app_name|default('{{ app_name }}') }}
+			{% endblock %}
+		</title>
+		<link rel="icon" href="/assets/images/favicon-nexora.ico" sizes="any">
+
+		<meta
+		name="description" content="Sistema {{ app_name }}">
+
+		<!-- Bootstrap Icons -->
+		<link
+		rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+
+		<!-- Bootstrap -->
+		<link
+		rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css">
+
+		<!-- AdminLTE -->
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@4.0.0/dist/css/adminlte.min.css"> {% block styles %}{% endblock %}
+
+		<style>
+			body,
+			.app-wrapper {
+				background: linear-gradient(135deg, #061d5a 0%, #0756c9 58%, #08bddd 100%) !important;
+			}
+
+			.app-main,
+			.app-content-header,
+			.app-content {
+				background: transparent !important;
+			}
+
+			.app-content-header h3,
+			.app-content-header .breadcrumb-item,
+			.app-content-header .breadcrumb-item a,
+			.app-content-header .breadcrumb-item + .breadcrumb-item::before {
+				color: #ffffff !important;
+			}
+
+			.app-content > .container-fluid > .d-flex.justify-content-between.align-items-center.mb-3 > div:first-child > h4,
+			.app-content > .container-fluid > .d-flex.justify-content-between.align-items-center.mb-3 > div:first-child > p,
+			.app-content > .container-fluid > .container-fluid > .row.mb-3 > .col-12 > .d-flex > div:first-child > h4,
+			.app-content > .container-fluid > .container-fluid > .row.mb-3 > .col-12 > .d-flex > div:first-child > p {
+				color: #ffffff !important;
+			}
+
+			.app-sidebar {
+				background: linear-gradient(180deg, #18cce3 0%, #0ea5e9 100%) !important;
+			}
+
+			.app-sidebar .brand-link,
+			.app-sidebar .brand-text,
+			.app-sidebar .nav-link,
+			.app-sidebar .nav-link p,
+			.app-sidebar .nav-link .nav-icon,
+			.app-sidebar .nav-header {
+				color: #061d5a !important;
+			}
+
+			.app-sidebar .nav-link:hover,
+			.app-sidebar .nav-link.active {
+				background-color: rgba(6, 29, 90, 0.14) !important;
+				color: #061d5a !important;
+			}
+		</style>
+
+		</head>
+
+		<body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
+
+			<div
+				class="app-wrapper">
+
+				<!-- Navbar -->
+
+				<nav class="app-header navbar navbar-expand bg-body">
+
+					<div class="container-fluid">
+
+						<ul class="navbar-nav">
+
+							<li class="nav-item">
+
+								<a class="nav-link" data-lte-toggle="sidebar" href="#" role="button">
+
+									<i class="bi bi-list"></i>
+
+								</a>
+
+							</li>
+
+							{% if empresa_atual %}
+								<li class="nav-item d-flex align-items-center ms-2">
+									<span class="small text-muted me-2 text-nowrap">
+										Empresa atual selecionada:
+									</span>
+									<form method="post" action="/empresa-atual">
+										<input type="hidden" name="return_to" value="/dashboard">
+										<select name="cod001" class="form-select form-select-sm" aria-label="Empresa atual" onchange="this.form.submit()">
+											{% for empresa in empresas_disponiveis %}
+												<option value="{{ empresa.cod001 }}" {% if empresa.cod001 == empresa_atual.cod001 %}selected{% endif %}>
+													{{ empresa.des001 }}
+												</option>
+											{% endfor %}
+										</select>
+									</form>
+								</li>
+							{% endif %}
+
+						</ul>
+
+						<ul class="navbar-nav ms-auto">
+
+							<li class="nav-item">
+
+								<a class="nav-link" href="#">
+
+									<i class="bi bi-bell"></i>
+
+								</a>
+
+							</li>
+
+						</ul>
+
+					</div>
+
+				</nav>
+
+
+				<!-- Sidebar -->
+
+				<aside class="app-sidebar shadow" data-bs-theme="light">
+
+					<div class="sidebar-brand">
+
+						<a href="/dashboard" class="brand-link">
+
+							<span class="brand-text fw-light">
+								{{ app_name }}
+							</span>
+
+						</a>
+
+					</div>
+
+
+					<div class="sidebar-wrapper">
+
+						<nav class="mt-2">
+
+							<ul
+								class="nav sidebar-menu flex-column" data-lte-toggle="treeview" role="menu">
+
+								<!-- Dashboard -->
+
+								<li class="nav-item">
+
+									<a href="/dashboard" class="nav-link">
+
+										<i class="nav-icon bi bi-speedometer2"></i>
+
+										<p>
+											Dashboard
+										</p>
+
+									</a>
+
+								</li>
+
+								{% if permissoes_menu.companies|default(false) or permissoes_menu.users|default(false) or permissoes_menu.knowledge|default(false) or permissoes_menu.ai_configuration|default(false) or permissoes_menu.webhook_test|default(false) or permissoes_menu.conversations|default(false) or permissoes_menu.channels|default(false) or permissoes_menu.audit|default(false) %}
+									<li class="nav-header">Opção do sistema</li>
+								{% endif %}
+
+								{% if permissoes_menu.companies|default(false) %}
+									<li class="nav-item"><a href="/empresas" class="nav-link"><i class="nav-icon bi bi-building"></i><p>Empresas</p></a></li>
+								{% endif %}
+
+								{% if permissoes_menu.users|default(false) %}
+									<li class="nav-item"><a href="/usuarios" class="nav-link"><i class="nav-icon bi bi-people"></i><p>Usuários</p></a></li>
+								{% endif %}
+
+								{% if permissoes_menu.knowledge|default(false) %}
+									<li class="nav-item"><a href="/conhecimento" class="nav-link"><i class="nav-icon bi bi-book"></i><p>Aprendizado da IA</p></a></li>
+								{% endif %}
+
+								{% if permissoes_menu.ai_configuration|default(false) %}
+									<li class="nav-item"><a href="/configuracoes/ia" class="nav-link"><i class="nav-icon bi bi-stars"></i><p>Configuração da IA</p></a></li>
+								{% endif %}
+
+								{% if permissoes_menu.webhook_test|default(false) %}
+									<li class="nav-item"><a href="/testes/webhook" class="nav-link"><i class="nav-icon bi bi-send-check"></i><p>Teste do webhook</p></a></li>
+								{% endif %}
+
+								{% if permissoes_menu.conversations|default(false) %}
+									<li class="nav-item"><a href="/conversas" class="nav-link"><i class="nav-icon bi bi-chat-dots"></i><p>Conversas</p></a></li>
+								{% endif %}
+
+								{% if permissoes_menu.channels|default(false) %}
+									<li class="nav-item"><a href="/canais" class="nav-link"><i class="nav-icon bi bi-broadcast"></i><p>Canais</p></a></li>
+								{% endif %}
+
+								{% if permissoes_menu.audit|default(false) %}
+									<li class="nav-item"><a href="/auditoria" class="nav-link"><i class="nav-icon bi bi-journal-text"></i><p>Auditoria</p></a></li>
+								{% endif %}
+
+
+								<li class="nav-item">
+
+									<a href="/minha-senha" class="nav-link">
+
+										<i class="nav-icon bi bi-key"></i>
+
+										<p>
+											Minha senha
+										</p>
+
+									</a>
+
+								</li>
+
+								<!-- Logout -->
+
+								<li class="nav-item">
+
+									<a href="/logout" class="nav-link">
+
+										<i class="nav-icon bi bi-box-arrow-right"></i>
+
+										<p>
+											Sair
+										</p>
+
+									</a>
+
+								</li>
+
+							</ul>
+
+						</nav>
+
+					</div>
+
+				</aside>
+
+
+				<!-- Conteúdo -->
+
+				<main class="app-main">
+
+					<div class="app-content-header">
+
+						<div class="container-fluid">
+
+							<div class="row">
+
+								<div class="col-sm-6">
+
+									<h3 class="mb-0">
+
+										{% block page_title %}
+											Dashboard
+										{% endblock %}
+
+									</h3>
+
+								</div>
+
+								<div class="col-sm-6">
+
+									<ol class="breadcrumb float-sm-end">
+
+										<li class="breadcrumb-item">
+
+											<a href="/dashboard">
+												Início
+											</a>
+
+										</li>
+
+										<li class="breadcrumb-item active">
+											Dashboard
+										</li>
+
+									</ol>
+
+								</div>
+
+							</div>
+
+						</div>
+
+					</div>
+
+
+					<div class="app-content">
+
+						<div class="container-fluid"> {% block content %}{% endblock %}
+
+							</div>
+
+						</div>
+
+					</main>
+
+
+					<!-- Footer -->
+
+					<footer class="app-footer">
+
+						<div class="float-end d-none d-sm-inline">
+							{{ app_name }}
+						</div>
+
+						<strong>
+
+							&copy;
+							{{ "now"|date("Y") }}
+
+							{{ app_name }}.
+
+						</strong>
+
+						Todos os direitos reservados.
+
+					</footer>
+
+				</div>
+
+
+				<!-- Bootstrap -->
+
+				<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+
+
+				<!-- AdminLTE -->
+
+				<script src="https://cdn.jsdelivr.net/npm/admin-lte@4.0.0/dist/js/adminlte.min.js"></script>
+
+				<script>
+					document.querySelectorAll('form[method="post"]').forEach(function (form) {
+						if (form.action.includes('/api/')) return;
+						const input = document.createElement('input');
+						input.type = 'hidden';
+						input.name = 'csrf_token';
+						input.value = {{ csrf_token|json_encode|raw }};
+						form.appendChild(input);
+					});
+				</script>
+
+				{% block scripts %}{% endblock %}
+
+			</body>
+
+		</html>
+		```
