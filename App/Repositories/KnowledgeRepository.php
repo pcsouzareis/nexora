@@ -42,6 +42,20 @@ final class KnowledgeRepository
         return $base === false ? null : $base;
     }
 
+    public function findBaseForN8n(int $baseCode): ?array
+    {
+        $statement = $this->database->pdo()->prepare('SELECT cod005, cod001, sts005, nkh005 FROM n005 WHERE cod005 = :baseCode LIMIT 1');
+        $statement->execute(['baseCode' => $baseCode]);
+        $base = $statement->fetch(PDO::FETCH_ASSOC);
+        return $base === false ? null : $base;
+    }
+
+    public function updateN8nKeyHash(int $companyCode, int $baseCode, string $hash): void
+    {
+        $statement = $this->database->pdo()->prepare('UPDATE n005 SET nkh005 = :hash, atu005 = CURRENT_TIMESTAMP WHERE cod005 = :baseCode AND cod001 = :companyCode');
+        $statement->execute(['hash' => $hash, 'baseCode' => $baseCode, 'companyCode' => $companyCode]);
+    }
+
 public function createBase(
     int $companyCode,
     string $description,
@@ -137,6 +151,34 @@ public function updateBaseAiConfiguration(
             'active' => $data['active'] ? 'true' : 'false',
         ]);
         return (int) $statement->fetchColumn();
+    }
+
+    public function upsertN8nArticle(int $baseCode, array $data): array
+    {
+        $checksum = hash('sha256', json_encode([$data['title'], $data['content'], $data['url'], $data['visibility'], $data['active']], JSON_UNESCAPED_UNICODE));
+        $existing = $this->database->pdo()->prepare('SELECT cod006, sha006 FROM n006 WHERE cod005 = :baseCode AND ext006 = :externalId LIMIT 1');
+        $existing->execute(['baseCode' => $baseCode, 'externalId' => $data['external_id']]);
+        $article = $existing->fetch(PDO::FETCH_ASSOC);
+        if ($article !== false && hash_equals((string) ($article['sha006'] ?? ''), $checksum)) return ['action' => 'ignored', 'article_id' => (int) $article['cod006']];
+
+        if ($article !== false) {
+            $statement = $this->database->pdo()->prepare(<<<'SQL'
+                UPDATE n006 SET tit006 = :title, con006 = :content, url006 = :url,
+                    vis006 = :visibility, sts006 = :active, sha006 = :checksum,
+                    ori006 = 'n8n', atu006 = CURRENT_TIMESTAMP
+                WHERE cod006 = :articleCode AND cod005 = :baseCode
+            SQL);
+            $statement->execute(['articleCode' => $article['cod006'], 'baseCode' => $baseCode, 'title' => $data['title'], 'content' => $data['content'], 'url' => $data['url'] ?: null, 'visibility' => $data['visibility'], 'active' => $data['active'] ? 'true' : 'false', 'checksum' => $checksum]);
+            return ['action' => 'updated', 'article_id' => (int) $article['cod006']];
+        }
+
+        $statement = $this->database->pdo()->prepare(<<<'SQL'
+            INSERT INTO n006 (cod005, tit006, con006, url006, vis006, sts006, ext006, sha006, ori006)
+            VALUES (:baseCode, :title, :content, :url, :visibility, :active, :externalId, :checksum, 'n8n')
+            RETURNING cod006
+        SQL);
+        $statement->execute(['baseCode' => $baseCode, 'title' => $data['title'], 'content' => $data['content'], 'url' => $data['url'] ?: null, 'visibility' => $data['visibility'], 'active' => $data['active'] ? 'true' : 'false', 'externalId' => $data['external_id'], 'checksum' => $checksum]);
+        return ['action' => 'created', 'article_id' => (int) $statement->fetchColumn()];
     }
     
     public function updateArticleStatus(

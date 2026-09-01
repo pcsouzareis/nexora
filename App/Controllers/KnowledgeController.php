@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Repositories\KnowledgeRepository;
+use App\Repositories\AuditRepository;
 use App\Repositories\UserRepository;
 use App\Support\Permission;
 use App\Support\Session;
@@ -15,7 +16,7 @@ use Slim\Views\Twig;
 
 final class KnowledgeController
 {
-    public function __construct(private readonly Twig $view, private readonly UserRepository $users, private readonly KnowledgeRepository $knowledge, private readonly CurrentCompanyContext $companies) {}
+    public function __construct(private readonly Twig $view, private readonly UserRepository $users, private readonly KnowledgeRepository $knowledge, private readonly CurrentCompanyContext $companies, private readonly AuditRepository $audit) {}
 
     public function index(ServerRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface
     {
@@ -187,11 +188,22 @@ public function updateBaseAiConfiguration(
         if (!Permission::allows($user, Permission::KNOWLEDGE_ACCESS)) return $this->redirect($response, '/dashboard');
         $base = $this->knowledge->findBase($this->companies->companyCode($user), (int) ($args['id'] ?? 0));
         if ($base === null) return $this->redirect($response, '/conhecimento');
-        return $this->view->render($response, 'knowledge/show.twig', $this->context($user, [
-            'base' => $base,
-            'artigos' => $this->knowledge->findArticles((int) $base['cod005']),
-            'can_manage' => Permission::allows($user, Permission::KNOWLEDGE_UPDATE),
-        ]));
+        return $this->renderBase($response, $user, $base);
+    }
+
+    public function regenerateN8nKey(ServerRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface
+    {
+        $user = $this->user($response);
+        if ($user instanceof ResponseInterface) return $user;
+        if (!Permission::allows($user, Permission::KNOWLEDGE_UPDATE)) return $this->redirect($response, '/dashboard');
+        $companyCode = $this->companies->companyCode($user);
+        $base = $this->knowledge->findBase($companyCode, (int) ($args['id'] ?? 0));
+        if ($base === null) return $this->redirect($response, '/conhecimento');
+        $key = 'n8n_' . bin2hex(random_bytes(24));
+        $this->knowledge->updateN8nKeyHash($companyCode, (int) $base['cod005'], password_hash($key, PASSWORD_DEFAULT));
+        $base['nkh005'] = 'configured';
+        $this->audit->record($companyCode, (int) $user['cod002'], 'UPDATE', 'Integração n8n', (int) $base['cod005'], 'Chave da integração n8n regenerada.', $this->clientIp($request));
+        return $this->renderBase($response, $user, $base, $key);
     }
 
     public function storeArticle(ServerRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface
@@ -259,6 +271,16 @@ public function updateBaseAiConfiguration(
         $user = $this->users->findByCode((int) $session['cod002']);
         return $user ?? $this->redirect($response, '/login');
     }
+
+    private function renderBase(ResponseInterface $response, array $user, array $base, ?string $n8nKey = null): ResponseInterface
+    {
+        return $this->view->render($response, 'knowledge/show.twig', $this->context($user, [
+            'base' => $base,
+            'artigos' => $this->knowledge->findArticles((int) $base['cod005']),
+            'can_manage' => Permission::allows($user, Permission::KNOWLEDGE_UPDATE),
+            'n8n_key' => $n8nKey,
+        ]));
+    }
     private function context(array $user, array $data): array
     {
         return $data + ['app_name' => $_ENV['APP_NAME'], 'usuario' => ['codigo' => $user['cod002'], 'nome' => $user['des002'], 'email' => $user['ema002'], 'perfil' => $user['rol002']]];
@@ -266,5 +288,11 @@ public function updateBaseAiConfiguration(
     private function redirect(ResponseInterface $response, string $location): ResponseInterface
     {
         return $response->withHeader('Location', $location)->withStatus(302);
+    }
+
+    private function clientIp(ServerRequestInterface $request): ?string
+    {
+        $ip = $request->getServerParams()['REMOTE_ADDR'] ?? null;
+        return is_string($ip) ? $ip : null;
     }
 }

@@ -25,6 +25,30 @@ final class EmailChannelRepository
         return $email === false ? null : $email;
     }
 
+    public function findAllActive(): array
+    {
+        $statement = $this->database->pdo()->query(<<<'SQL'
+            SELECT cod003, cod001, cod005, imh003, imp003, ime003, imu003, imw003,
+                   smh003, smp003, sme003, smu003, smw003, outema003
+            FROM n003
+            WHERE tip003 = 'E-Mail' AND sts003 = TRUE
+              AND imh003 IS NOT NULL AND imw003 IS NOT NULL
+              AND smh003 IS NOT NULL AND smw003 IS NOT NULL
+            ORDER BY cod001, cod003
+        SQL);
+        return $statement->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function tryAcquireSyncLock(): bool
+    {
+        return (bool) $this->database->pdo()->query("SELECT pg_try_advisory_lock(hashtext('nexora:email-sync'))")->fetchColumn();
+    }
+
+    public function releaseSyncLock(): void
+    {
+        $this->database->pdo()->query("SELECT pg_advisory_unlock(hashtext('nexora:email-sync'))");
+    }
+
     public function save(int $companyCode, int $channelCode, array $data): void
     {
         $statement = $this->database->pdo()->prepare(<<<'SQL'

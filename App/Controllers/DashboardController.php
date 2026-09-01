@@ -81,6 +81,7 @@ final class DashboardController
                 'resumo' => $dashboard['resumo'],
                 'dashboard_enabled' => $dashboardEnabled,
                 'empresa_atual' => (string) ($currentCompany['des001'] ?? 'Empresa não encontrada'),
+                'system_path' => realpath(dirname(__DIR__, 2)) ?: dirname(__DIR__, 2),
             ]
         );
     }

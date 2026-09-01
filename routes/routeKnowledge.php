@@ -23,4 +23,5 @@ return static function (App $app): void {
         '/conhecimento/{id:[0-9]+}/configuracao-ia',
         [KnowledgeController::class, 'updateBaseAiConfiguration']
     )->add(AuthMiddleware::class);
+    $app->post('/conhecimento/{id:[0-9]+}/n8n/nova-chave', [KnowledgeController::class, 'regenerateN8nKey'])->add(AuthMiddleware::class);
 };

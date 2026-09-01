@@ -6,6 +6,7 @@ use App\Controllers\HomeController;
 use App\Controllers\WebhookController;
 use App\Controllers\ZApiWebhookController;
 use App\Controllers\MetaWebhookController;
+use App\Controllers\N8nKnowledgeController;
 use Slim\App;
 use Slim\Interfaces\RouteCollectorProxyInterface;
 
@@ -37,6 +38,7 @@ return static function (App $app): void {
             $group->post('/zapi/{token:[a-f0-9]{40}}/status', [ZApiWebhookController::class, 'status']);
             $group->get('/meta/{token:[a-f0-9]{40}}', [MetaWebhookController::class, 'verify']);
             $group->post('/meta/{token:[a-f0-9]{40}}', [MetaWebhookController::class, 'receive']);
+            $group->post('/n8n/bases/{id:[0-9]+}/artigos', [N8nKnowledgeController::class, 'upsert']);
         }
     );
 };
