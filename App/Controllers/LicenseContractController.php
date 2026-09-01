@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
-    use App\Repositories\LicenseContractAccessRepository;
-    use App\Repositories\UserRepository;
+use App\Repositories\LicenseContractAccessRepository;
+use App\Repositories\UserRepository;
 use App\Services\CurrentCompanyContext;
 use App\Support\Session;
 use Psr\Http\Message\ResponseInterface;
@@ -15,9 +15,9 @@ use Psr\Http\Message\ServerRequestInterface;
 final class LicenseContractController
 {
     public function __construct(
-            private readonly UserRepository $users,
-            private readonly CurrentCompanyContext $companies,
-            private readonly LicenseContractAccessRepository $accesses
+        private readonly UserRepository $users,
+        private readonly CurrentCompanyContext $companies,
+        private readonly LicenseContractAccessRepository $accesses
     ) {}
 
     public function show(
@@ -33,26 +33,26 @@ final class LicenseContractController
 
         $user = $this->users->findByCode((int) $sessionUser['cod002']);
 
-            if ($user === null) {
-                Session::logout();
+        if ($user === null) {
+            Session::logout();
 
-                return $response->withHeader('Location', '/login')->withStatus(302);
-            }
+            return $response->withHeader('Location', '/login')->withStatus(302);
+        }
 
-            if ((string) $user['rol002'] !== 'S') {
-                return $response->withHeader('Location', '/dashboard')->withStatus(302);
-            }
+        if ((string) $user['rol002'] !== 'S') {
+            return $response->withHeader('Location', '/dashboard')->withStatus(302);
+        }
 
         $company = $this->companies->currentCompany($user);
 
-            if ($company === null) {
-                return $response->withHeader('Location', '/dashboard')->withStatus(302);
-            }
+        if ($company === null) {
+            return $response->withHeader('Location', '/dashboard')->withStatus(302);
+        }
 
-            $this->accesses->registerView(
-                (int) $company['cod001'],
-                (int) $user['cod002']
-            );
+        $this->accesses->registerView(
+            (int) $company['cod001'],
+            (int) $user['cod002']
+        );
 
         $templatePath = dirname(__DIR__, 2)
             . '/Public/assets/contrato/contrato_licenca_nexora.html';
@@ -64,10 +64,10 @@ final class LicenseContractController
         }
 
         $html = strtr($template, [
-                '{{VERSAO_CONTRATO}}' => $this->escape($this->environment('CONTRACT_VERSION', '1.0')),
-                '{{VALOR_IMPLANTACAO}}' => $this->escape(
-                    $this->environment('CONTRACT_IMPLEMENTATION_VALUE', 'R$ 2.000,00 (dois mil reais)')
-                ),
+            '{{VERSAO_CONTRATO}}' => $this->escape($this->environment('CONTRACT_VERSION', '1.0')),
+            '{{VALOR_IMPLANTACAO}}' => $this->escape(
+                $this->environment('CONTRACT_IMPLEMENTATION_VALUE', 'R$ 2.000,00 (dois mil reais)')
+            ),
             '{{RAZAO_SOCIAL_LICENCIANTE}}' => $this->escape(
                 $this->environment('CONTRACT_LICENSOR_NAME', (string) ($_ENV['APP_NAME'] ?? 'Nexora'))
             ),
