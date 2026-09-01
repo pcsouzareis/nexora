@@ -8,7 +8,34 @@
 {% if canal.tip003 == 'WhatsApp' %}<div class="card"><div class="card-header"><strong>Z-API</strong></div><div class="card-body"><p class="mb-1">Instância: {{ canal.ins003|default('Não configurada') }}</p><p class="mb-0">Envio humano: {{ canal.out003 and canal.zapi_configured ? 'ativo' : 'não configurado ou inativo' }}</p></div></div>{% endif %}
 {% if canal.tip003 == 'E-Mail' %}<div class="card"><div class="card-header"><strong>Conta de e-mail</strong></div><div class="card-body"><p class="mb-1">IMAP: {{ canal.imh003|default('Não configurado') }}{% if canal.imp003 %}:{{ canal.imp003 }}{% endif %}</p><p class="mb-1">SMTP: {{ canal.smh003|default('Não configurado') }}{% if canal.smp003 %}:{{ canal.smp003 }}{% endif %}</p><p class="mb-0">Envio automático: {{ canal.outema003 and canal.email_configured ? 'ativo' : 'não configurado ou inativo' }}</p></div></div>{% endif %}
 {% if canal.tip003 == 'Telegram' %}<div class="card"><div class="card-header"><strong>Bot do Telegram</strong></div><div class="card-body"><p class="mb-1">Credencial: {{ canal.telegram_configured ? 'configurada' : 'não configurada' }}</p><p class="mb-0">Respostas automáticas: {{ canal.outtel003 and canal.telegram_configured ? 'ativas' : 'inativas' }}</p></div></div>{% endif %}
-{% if canal.tip003 == 'WhatsApp' and canal.pub003 %}<div class="card"><div class="card-header"><strong>Webhooks Z-API</strong></div><div class="card-body"><p class="mb-1">Recebimento:</p><code>/api/zapi/{{ canal.pub003 }}/receber</code><p class="mt-3 mb-1">Entrega:</p><code>/api/zapi/{{ canal.pub003 }}/entrega</code><p class="mt-3 mb-1">Status:</p><code>/api/zapi/{{ canal.pub003 }}/status</code><p class="text-muted small mt-3 mb-0">Configure os três endereços com domínio HTTPS no painel da instância Z-API.</p></div></div>{% endif %}
+{% if canal.tip003 == 'WhatsApp' and canal.pub003 %}
+<div class="card">
+    <div class="card-header"><strong><i class="bi bi-link-45deg me-1"></i>Webhooks Z-API</strong></div>
+    <div class="card-body">
+        <p class="text-muted small mb-3">Copie os endereços abaixo, inclua o domínio HTTPS do Nexora e configure cada um no respectivo campo do painel Z-API.</p>
+        <div class="row g-3">
+            <div class="col-md-4 d-flex">
+                <div class="card card-outline card-primary h-100 w-100 mb-0">
+                    <div class="card-header"><strong><i class="bi bi-chat-dots me-1"></i>Recebimento</strong></div>
+                    <div class="card-body"><code class="text-break">/api/zapi/{{ canal.pub003 }}/receber</code></div>
+                </div>
+            </div>
+            <div class="col-md-4 d-flex">
+                <div class="card card-outline card-success h-100 w-100 mb-0">
+                    <div class="card-header"><strong><i class="bi bi-check2-circle me-1"></i>Entrega</strong></div>
+                    <div class="card-body"><code class="text-break">/api/zapi/{{ canal.pub003 }}/entrega</code></div>
+                </div>
+            </div>
+            <div class="col-md-4 d-flex">
+                <div class="card card-outline card-secondary h-100 w-100 mb-0">
+                    <div class="card-header"><strong><i class="bi bi-activity me-1"></i>Status</strong></div>
+                    <div class="card-body"><code class="text-break">/api/zapi/{{ canal.pub003 }}/status</code></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
 </div><div class="col-lg-4"><div class="card"><div class="card-header"><strong>Webhook genérico</strong></div><div class="card-body"><p class="mb-2">Endpoint <i class="bi bi-question-circle ms-1 text-muted" tabindex="0" data-bs-toggle="tooltip" title="URL usada por integrações externas para enviar mensagens ao Nexora. A integração deve informar a chave do webhook no cabeçalho X-Nexora-Webhook-Key."></i>:</p><code>/api/webhooks/{{ canal.cod003 }}</code><p class="mt-3 mb-0">Chave: {{ canal.webhook_configured ? 'configurada' : 'não configurada' }}</p></div>{% if can_update %}<div class="card-footer"><form method="post" action="/canais/{{ canal.cod003 }}/nova-chave"><button class="btn btn-outline-primary btn-sm" data-bs-toggle="tooltip" title="Invalida a chave atual. Copie e guarde a nova chave, pois ela será mostrada apenas uma vez.">Gerar nova chave</button></form></div>{% endif %}</div></div></div>
 {% endblock %}
 

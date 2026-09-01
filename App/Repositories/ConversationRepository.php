@@ -58,7 +58,7 @@ final class ConversationRepository
         $statement = $this->database->pdo()->prepare(<<<'SQL'
             SELECT
                 c.cod008, c.sts008, c.pri008, c.ini008, c.fim008, c.cod002, c.ide008, c.web008,
-                (c.cod002 IS NOT NULL AND c.sts008 IN ('Em Atendimento', 'Aguardando')) AS atendimento_humano,
+                (c.sts008 = 'Aguardando' OR (c.cod002 IS NOT NULL AND c.sts008 = 'Em Atendimento')) AS atendimento_humano,
                 (c.web008 >= CURRENT_TIMESTAMP - INTERVAL '2 minutes' AND c.sts008 NOT IN ('Encerrada', 'Cancelada')) AS cliente_online,
                 cli.des007 AS cliente, cli.ema007, cli.tel007,
                 ch.des003 AS canal, b.des005 AS base, u.des002 AS atendente

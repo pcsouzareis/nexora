@@ -95,6 +95,33 @@ final class WebhookMessageProcessor
                 $this->webhooks->findPublicKnowledge($data['base_id']),
                 $data['message']
             );
+
+            if ($answer['requires_human']) {
+                $this->webhooks->markForHumanHandoff($companyCode, $conversationCode);
+                $handoffMessage = 'Não localizei uma informação segura para responder agora. Um atendente dará continuidade ao seu atendimento.';
+                $replyCode = $this->webhooks->createChatbotReply(
+                    $conversationCode,
+                    $messageCode,
+                    $handoffMessage,
+                    $answer['tokens']
+                );
+
+                return [
+                    'status' => 202,
+                    'body' => [
+                        'received' => true,
+                        'processed' => false,
+                        'human_handoff' => true,
+                        'conversation_id' => $conversationCode,
+                        'message_id' => $messageCode,
+                        'reply' => [
+                            'message_id' => $replyCode,
+                            'message' => $handoffMessage,
+                        ],
+                    ],
+                ];
+            }
+
             $replyCode = $this->webhooks->createChatbotReply(
                 $conversationCode,
                 $messageCode,

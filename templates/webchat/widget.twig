@@ -93,11 +93,13 @@
                 const data = await response.json();
                 if (!response.ok) throw new Error(data.error || 'Não foi possível enviar.');
                 input.value = '';
-                notice.textContent = data.human_handling
+                notice.textContent = data.human_handoff
+                    ? 'Mensagem recebida. Um atendente dará continuidade.'
+                    : (data.human_handling
                     ? 'Mensagem recebida. Um atendente dará continuidade.'
                     : (data.processed === false
                     ? 'Mensagem recebida. Aguarde uma resposta.'
-                    : '');
+                    : ''));
                 await loadMessages();
             } catch (error) {
                 notice.textContent = error.message || 'Não foi possível enviar a mensagem.';

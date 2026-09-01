@@ -203,8 +203,10 @@ final class WebhookRepository
             FROM n008
             WHERE cod001 = :companyCode
               AND cod008 = :conversationCode
-              AND cod002 IS NOT NULL
-              AND sts008 IN ('Em Atendimento', 'Aguardando')
+              AND (
+                  sts008 = 'Aguardando'
+                  OR (cod002 IS NOT NULL AND sts008 = 'Em Atendimento')
+              )
             LIMIT 1
         SQL);
         $statement->execute([
@@ -226,6 +228,23 @@ final class WebhookRepository
               AND sts008 IN ('Em Atendimento', 'Aguardando')
         SQL);
         $statement->execute(['companyCode' => $companyCode, 'conversationCode' => $conversationCode]);
+    }
+
+    public function markForHumanHandoff(int $companyCode, int $conversationCode): void
+    {
+        $statement = $this->database->pdo()->prepare(<<<'SQL'
+            UPDATE n008
+            SET cod002 = NULL,
+                sts008 = 'Aguardando'
+            WHERE cod001 = :companyCode
+              AND cod008 = :conversationCode
+              AND sts008 IN ('Aberta', 'Aguardando', 'Em Atendimento')
+        SQL);
+
+        $statement->execute([
+            'companyCode' => $companyCode,
+            'conversationCode' => $conversationCode,
+        ]);
     }
 
     public function createChatbotReply(

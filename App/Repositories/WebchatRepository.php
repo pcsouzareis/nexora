@@ -36,7 +36,7 @@ final class WebchatRepository
     {
         $statement = $this->database->pdo()->prepare(<<<'SQL'
             SELECT c.cod008, c.sts008,
-                   (c.cod002 IS NOT NULL AND c.sts008 IN ('Em Atendimento', 'Aguardando')) AS human_handling
+                   (c.sts008 = 'Aguardando' OR (c.cod002 IS NOT NULL AND c.sts008 = 'Em Atendimento')) AS human_handling
             FROM n008 c
             INNER JOIN n007 cli ON cli.cod007 = c.cod007
             WHERE c.cod003 = :channelCode
