@@ -16,6 +16,7 @@ return static function (App $app): void {
         __DIR__ . '/routeKnowledge.php',
         __DIR__ . '/routeConversations.php',
         __DIR__ . '/routeChannels.php',
+        __DIR__ . '/routeIntegrations.php',
         __DIR__ . '/routeAudit.php',
         __DIR__ . '/routeEmpresas.php',
         __DIR__ . '/routeUsuarios.php',

@@ -1,0 +1,39 @@
+{% extends 'layouts/adminlte.twig' %}
+
+{% block title %}Integrações | {{ app_name }}{% endblock %}
+{% block page_title %}Integrações{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h4 class="mb-1">Monitoramento de integrações</h4>
+        <p class="text-muted mb-0">Situação dos canais e da inteligência artificial por empresa.</p>
+    </div>
+</div>
+
+<div class="row g-3">
+    {% for integracao in integracoes %}
+        <div class="col-xl-6 d-flex">
+            <div class="card h-100 w-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <strong><i class="bi bi-building me-1"></i>{{ integracao.des001 }}</strong>
+                    <span class="badge text-bg-{{ integracao.sts001 ? 'success' : 'secondary' }}">{{ integracao.sts001 ? 'Empresa ativa' : 'Empresa inativa' }}</span>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3 text-center">
+                        <div class="col-6 col-md-4"><div class="border rounded p-2 h-100"><i class="bi bi-stars d-block fs-4 text-primary"></i><strong>IA</strong><div class="small {{ integracao.ia_ativa ? 'text-success' : 'text-secondary' }}">{{ integracao.ia_ativa ? 'Ativa' : 'Inativa' }}</div></div></div>
+                        <div class="col-6 col-md-4"><div class="border rounded p-2 h-100"><i class="bi bi-whatsapp d-block fs-4 text-success"></i><strong>WhatsApp</strong><div class="small text-muted">{{ integracao.whatsapp }} ativo(s)</div></div></div>
+                        <div class="col-6 col-md-4"><div class="border rounded p-2 h-100"><i class="bi bi-telegram d-block fs-4 text-info"></i><strong>Telegram</strong><div class="small text-muted">{{ integracao.telegram }} ativo(s)</div></div></div>
+                        <div class="col-6 col-md-4"><div class="border rounded p-2 h-100"><i class="bi bi-envelope d-block fs-4 text-danger"></i><strong>E-mail</strong><div class="small text-muted">{{ integracao.email }} ativo(s)</div></div></div>
+                        <div class="col-6 col-md-4"><div class="border rounded p-2 h-100"><i class="bi bi-meta d-block fs-4 text-primary"></i><strong>Meta</strong><div class="small text-muted">{{ integracao.meta }} ativo(s)</div></div></div>
+                        <div class="col-6 col-md-4"><div class="border rounded p-2 h-100"><i class="bi bi-broadcast d-block fs-4 text-secondary"></i><strong>Canais</strong><div class="small text-muted">{{ integracao.canais_ativos }} ativo(s)</div></div></div>
+                    </div>
+                </div>
+                <div class="card-footer text-end"><a class="btn btn-outline-primary btn-sm" href="/canais">Abrir canais</a></div>
+            </div>
+        </div>
+    {% else %}
+        <div class="col-12"><div class="alert alert-info mb-0">Nenhuma empresa criada por você possui integrações para exibir.</div></div>
+    {% endfor %}
+</div>
+{% endblock %}

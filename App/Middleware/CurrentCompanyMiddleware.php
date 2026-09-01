@@ -47,6 +47,7 @@ final class CurrentCompanyMiddleware
                     'webhook_test' => Permission::allows($user, Permission::AI_WEBHOOK_TEST),
                     'conversations' => Permission::allows($user, Permission::CONVERSATION_ACCESS),
                     'channels' => Permission::allows($user, Permission::CHANNEL_ACCESS),
+                    'integrations' => in_array((string) $user['rol002'], ['D', 'S'], true),
                     'audit' => Permission::allows($user, Permission::AUDIT_ACCESS),
                 ];
             }

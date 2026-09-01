@@ -181,7 +181,7 @@
 
 								</li>
 
-								{% if permissoes_menu.companies|default(false) or permissoes_menu.users|default(false) or permissoes_menu.knowledge|default(false) or permissoes_menu.ai_configuration|default(false) or permissoes_menu.webhook_test|default(false) or permissoes_menu.conversations|default(false) or permissoes_menu.channels|default(false) or permissoes_menu.audit|default(false) %}
+								{% if permissoes_menu.companies|default(false) or permissoes_menu.users|default(false) or permissoes_menu.knowledge|default(false) or permissoes_menu.ai_configuration|default(false) or permissoes_menu.webhook_test|default(false) or permissoes_menu.conversations|default(false) or permissoes_menu.channels|default(false) or permissoes_menu.integrations|default(false) or permissoes_menu.audit|default(false) %}
 									<li class="nav-header">Opção do sistema</li>
 								{% endif %}
 
@@ -211,6 +211,10 @@
 
 								{% if permissoes_menu.channels|default(false) %}
 									<li class="nav-item"><a href="/canais" class="nav-link"><i class="nav-icon bi bi-broadcast"></i><p>Canais</p></a></li>
+								{% endif %}
+
+								{% if permissoes_menu.integrations|default(false) %}
+									<li class="nav-item"><a href="/integracoes" class="nav-link"><i class="nav-icon bi bi-plug"></i><p>Integrações</p></a></li>
 								{% endif %}
 
 								{% if permissoes_menu.audit|default(false) %}
