@@ -71,7 +71,7 @@
 
     <div class="row">
 
-        <div class="col-lg-4 col-md-6 d-flex">
+        <div class="{{ is_administrator ? 'col-lg-4' : 'col-lg-6' }} col-md-6 d-flex">
 
             <div class="card h-100 w-100">
 
@@ -126,7 +126,7 @@
 
         <!-- Empresa -->
 
-        <div class="col-lg-4 col-md-6 d-flex">
+        <div class="{{ is_administrator ? 'col-lg-4' : 'col-lg-6' }} col-md-6 d-flex">
 
             <div class="card h-100 w-100">
 
@@ -144,15 +144,27 @@
 
                 <div class="card-body">
 
-                    <p class="text-muted mb-0">
+                    <p class="text-muted mb-1">
 
                         Empresa vinculada ao usuário:
 
                     </p>
 
-                    <h5 class="mt-2 mb-0">
+                    <h5 class="mt-1 mb-3">
 
-                        {{ empresa_atual }}
+                        {{ empresa_vinculada }}
+
+                    </h5>
+
+                    <p class="text-muted mb-1">
+
+                        Empresa atualmente selecionada:
+
+                    </p>
+
+                    <h5 class="mt-1 mb-0">
+
+                        {{ empresa_atual_dashboard }}
 
                     </h5>
 
@@ -163,6 +175,7 @@
         </div>
 
 
+        {% if is_administrator %}
         <!-- Sistema -->
 
         <div class="col-lg-4 col-md-12 d-flex">
@@ -216,6 +229,7 @@
             </div>
 
         </div>
+        {% endif %}
 
     </div>
 

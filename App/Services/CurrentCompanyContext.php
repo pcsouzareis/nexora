@@ -27,7 +27,22 @@ final class CurrentCompanyContext
         }
 
         if ($role === 'S') {
-            return $this->supervisorCompanies->findCompanies((int) $user['cod002']);
+            $companies = $this->supervisorCompanies->findCompanies((int) $user['cod002']);
+            $linkedCompany = $this->companies->findByCode((int) $user['cod001']);
+
+            if ($linkedCompany === null || !$this->isActive($linkedCompany)) {
+                return $companies;
+            }
+
+            foreach ($companies as $company) {
+                if ((int) $company['cod001'] === (int) $linkedCompany['cod001']) {
+                    return $companies;
+                }
+            }
+
+            array_unshift($companies, $linkedCompany);
+
+            return $companies;
         }
 
         $company = $this->companies->findByCode((int) $user['cod001']);

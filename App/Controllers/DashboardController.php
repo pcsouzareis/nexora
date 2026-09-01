@@ -80,7 +80,9 @@ final class DashboardController
 
                 'resumo' => $dashboard['resumo'],
                 'dashboard_enabled' => $dashboardEnabled,
-                'empresa_atual' => (string) ($currentCompany['des001'] ?? 'Empresa não encontrada'),
+                'empresa_vinculada' => (string) ($user['des001'] ?? 'Empresa não encontrada'),
+                'empresa_atual_dashboard' => (string) ($currentCompany['des001'] ?? 'Empresa não encontrada'),
+                'is_administrator' => (string) $user['rol002'] === 'D',
                 'system_path' => realpath(dirname(__DIR__, 2)) ?: dirname(__DIR__, 2),
             ]
         );

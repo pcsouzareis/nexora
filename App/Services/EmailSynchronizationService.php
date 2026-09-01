@@ -66,7 +66,8 @@ final class EmailSynchronizationService
     {
         $flags = match ((string) ($channel['ime003'] ?? 'ssl')) { 'tls' => '/imap/tls', 'none' => '/imap/notls', default => '/imap/ssl' };
         $mailbox = sprintf('{%s:%d%s}INBOX', $channel['imh003'], (int) $channel['imp003'], $flags);
-        $connection = @imap_open($mailbox, (string) $channel['imu003'], $this->encryption->decrypt((string) $channel['imw003']), OP_READWRITE, 1);
+        $openOptions = defined('OP_READWRITE') ? (int) constant('OP_READWRITE') : 0;
+        $connection = @imap_open($mailbox, (string) $channel['imu003'], $this->encryption->decrypt((string) $channel['imw003']), $openOptions, 1);
         if ($connection === false) throw new RuntimeException('Não foi possível conectar ao IMAP: ' . (imap_last_error() ?: 'erro desconhecido.'));
         return $connection;
     }
@@ -125,6 +126,6 @@ final class EmailSynchronizationService
         return $socket;
     }
 
-    private function command($socket, string $command, array $accepted): void { fwrite($socket, $command . "\r\n"); $this->expect($socket, $accepted); }
-    private function expect($socket, array $accepted): void { do { $line = fgets($socket, 4096); if ($line === false) throw new RuntimeException('O servidor SMTP não respondeu.'); } while (isset($line[3]) && $line[3] === '-'); if (!in_array((int) substr($line, 0, 3), $accepted, true)) throw new RuntimeException('SMTP recusou o envio: ' . trim($line)); }
+    private function command(mixed $socket, string $command, array $accepted): void { fwrite($socket, $command . "\r\n"); $this->expect($socket, $accepted); }
+    private function expect(mixed $socket, array $accepted): void { do { $line = fgets($socket, 4096); if ($line === false) throw new RuntimeException('O servidor SMTP não respondeu.'); } while (isset($line[3]) && $line[3] === '-'); if (!in_array((int) substr($line, 0, 3), $accepted, true)) throw new RuntimeException('SMTP recusou o envio: ' . trim($line)); }
 }
