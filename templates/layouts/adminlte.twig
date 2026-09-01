@@ -363,6 +363,31 @@
 
 				{% block scripts %}{% endblock %}
 
+				<script>
+					document.querySelectorAll('input:not([type="hidden"]), select, textarea').forEach(function (field) {
+						if (field.disabled || field.dataset.bsToggle === 'tooltip') {
+							return;
+						}
+
+						let label = field.id
+							? document.querySelector('label[for="' + CSS.escape(field.id) + '"]')
+							: null;
+
+						if (!label) {
+							label = field.closest('.form-check, .input-group, .col, .mb-3')?.querySelector('label');
+						}
+
+						const labelText = label?.textContent.replace(/\s+/g, ' ').trim();
+						const tooltip = field.dataset.tooltip
+							|| field.getAttribute('title')
+							|| (labelText ? 'Use este campo para informar ou selecionar: ' + labelText + '.' : 'Preencha este campo conforme necessário.');
+
+						field.setAttribute('title', tooltip);
+						field.dataset.bsToggle = 'tooltip';
+						bootstrap.Tooltip.getOrCreateInstance(field);
+					});
+				</script>
+
 			</body>
 
 		</html>
