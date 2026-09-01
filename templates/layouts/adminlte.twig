@@ -106,7 +106,7 @@
 
 							</li>
 
-							{% if empresa_atual %}
+							{% if empresa_atual and usuario_atual.perfil|default('') != 'A' %}
 								<li class="nav-item d-flex align-items-center ms-2">
 									<span class="small text-muted me-2 text-nowrap">
 										Empresa atual selecionada:

@@ -31,6 +31,7 @@ final class UserRepository
                 u.ema002,
                 u.rol002,
                 u.sts002,
+                u.cri002,
                 u.cad002,
                 u.atu002,
                 e.des001,
@@ -67,6 +68,7 @@ final class UserRepository
                 u.ema002,
                 u.rol002,
                 u.sts002,
+                u.cri002,
                 u.cad002,
                 u.atu002,
                 e.des001,
@@ -105,6 +107,7 @@ final class UserRepository
             u.rol002,
             u.sen002,
             u.sts002,
+            u.cri002,
             u.cad002,
             u.atu002,
             e.des001,
@@ -142,6 +145,26 @@ final class UserRepository
         $result['perfil_name'] = $result['des014'];
 
         return $result;
+    }
+
+    /** @return array<int, array<string, mixed>> */
+    public function findAllCreatedBy(int $creatorCode): array
+    {
+        $statement = $this->database->pdo()->prepare(<<<'SQL'
+            SELECT
+                u.cod002, u.cod001, u.cod014, u.des002, u.ema002, u.rol002,
+                u.sts002, u.cri002, u.cad002, u.atu002, e.des001,
+                p.des014, p.ace014
+            FROM n002 u
+            INNER JOIN n001 e ON e.cod001 = u.cod001
+            INNER JOIN n014 p ON p.cod014 = u.cod014
+            WHERE u.cri002 = :creatorCode
+            ORDER BY e.des001, u.des002
+        SQL);
+
+        $statement->execute(['creatorCode' => $creatorCode]);
+
+        return $statement->fetchAll(PDO::FETCH_ASSOC);
     }
 
     /**
@@ -236,14 +259,16 @@ final class UserRepository
                 des002,
                 ema002,
                 rol002,
-                sts002
+                sts002,
+                cri002
             ) VALUES (
                 :cod001,
                 :cod014,
                 :des002,
                 :ema002,
                 :rol002,
-                :sts002
+                :sts002,
+                :cri002
             )
             RETURNING cod002
         SQL;
@@ -261,6 +286,7 @@ final class UserRepository
                 'ema002' => $data['ema002'],
                 'rol002' => $data['rol002'],
                 'sts002' => $data['sts002'] ? 'true' : 'false',
+                'cri002' => $data['cri002'] ?? null,
             ]);
 
             $code = (int) $statement->fetchColumn();

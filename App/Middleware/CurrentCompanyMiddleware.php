@@ -26,12 +26,17 @@ final class CurrentCompanyMiddleware
         $currentCompany = null;
         $availableCompanies = [];
         $menuPermissions = [];
+        $currentUser = null;
         $sessionUser = Session::user();
 
         if ($sessionUser !== null) {
             $user = $this->users->findByCode((int) $sessionUser['cod002']);
 
             if ($user !== null) {
+                $currentUser = [
+                    'codigo' => (int) $user['cod002'],
+                    'perfil' => (string) $user['rol002'],
+                ];
                 $availableCompanies = $this->companies->availableCompanies($user);
                 $currentCompany = $this->companies->currentCompany($user);
                 $menuPermissions = [
@@ -50,6 +55,7 @@ final class CurrentCompanyMiddleware
         $environment = $this->view->getEnvironment();
         $environment->addGlobal('empresa_atual', $currentCompany);
         $environment->addGlobal('empresas_disponiveis', $availableCompanies);
+        $environment->addGlobal('usuario_atual', $currentUser);
         $environment->addGlobal('permissoes_menu', $menuPermissions);
         $environment->addGlobal('csrf_token', Session::csrfToken());
 

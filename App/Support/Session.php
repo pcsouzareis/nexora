@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace App\Support;
 
-use App\Support\UserRole;
-
 final class Session
 {
     private const AUTH_KEY = 'auth';
     private const CSRF_KEY = 'csrf_token';
+    private const PROFILE_NAMES = [
+        'D' => 'Administrador',
+        'S' => 'Supervisor',
+        'A' => 'Atendente',
+    ];
 
     public static function start(): void
     {
@@ -34,7 +37,7 @@ final class Session
             'cod001' => $cod001,
             'empresa_atual' => $cod001,
             'rol002' => $rol002,
-            'perfil_name' => UserRole::PERFIL[$rol002] ?? $rol002,
+            'perfil_name' => self::PROFILE_NAMES[$rol002] ?? $rol002,
         ];
         
     }

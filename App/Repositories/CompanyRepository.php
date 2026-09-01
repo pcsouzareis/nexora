@@ -46,6 +46,7 @@ final class CompanyRepository
             tel001,
             log001,
             sts001,
+            cri001,
             cad001,
             atu001
         FROM n001
@@ -73,6 +74,7 @@ final class CompanyRepository
                     tel001,
                     log001,
                     sts001,
+                    cri001,
                     cad001,
                     atu001
                 FROM n001
@@ -103,6 +105,7 @@ final class CompanyRepository
                     tel001,
                     log001,
                     sts001,
+                    cri001,
                     cad001,
                     atu001
                 FROM n001
@@ -119,6 +122,22 @@ final class CompanyRepository
         $result = $statement->fetch(PDO::FETCH_ASSOC);
 
         return $result ?: null;
+    }
+
+    /** @return array<int, array<string, mixed>> */
+    public function findAllCreatedBy(int $creatorCode): array
+    {
+        $statement = $this->database->pdo()->prepare(<<<'SQL'
+            SELECT cod001, des001, doc001, ema001, tel001, log001, sts001,
+                   cri001, cad001, atu001
+            FROM n001
+            WHERE cri001 = :creatorCode
+            ORDER BY des001 ASC
+        SQL);
+
+        $statement->execute(['creatorCode' => $creatorCode]);
+
+        return $statement->fetchAll(PDO::FETCH_ASSOC);
     }
 
     /**
@@ -209,7 +228,8 @@ final class CompanyRepository
             ema001,
             tel001,
             log001,
-            sts001
+            sts001,
+            cri001
         )
         VALUES (
             :des001,
@@ -217,7 +237,8 @@ final class CompanyRepository
             :ema001,
             :tel001,
             :log001,
-            TRUE
+            :sts001,
+            :cri001
         )
         RETURNING cod001
     SQL;
@@ -230,6 +251,8 @@ final class CompanyRepository
             'ema001' => $data['ema001'],
             'tel001' => $data['tel001'] ?? null,
             'log001' => $data['log001'] ?? null,
+            'sts001' => (bool) ($data['sts001'] ?? false),
+            'cri001' => $data['cri001'] ?? null,
         ]);
 
         return (int) $statement->fetchColumn();

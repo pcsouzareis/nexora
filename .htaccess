@@ -1,16 +1,23 @@
 Options -Indexes
 RewriteEngine On
 
+# Expõe somente os arquivos estáticos dentro de Public/assets.
+RewriteRule ^assets/(.+)$ Public/assets/$1 [L,NC]
+
+# Bloqueia tentativas externas de acessar Public/assets diretamente.
+# A reescrita interna acima permanece permitida, pois THE_REQUEST conserva
+# a URL original solicitada pelo navegador.
+RewriteCond %{THE_REQUEST} \s/+Public/assets(?:/|\s) [NC]
+RewriteRule ^Public/assets(?:/|$) - [F,L]
+
 # Bloqueia acesso direto ao código, configurações e dados internos.
-RewriteRule ^(?:App|Config|Database|Resources|routes|Storage|templates|Tests|vendor|Public|uploads|doc's)(?:/|$) - [F,L,NC]
+RewriteRule ^(?:App|Config|Database|Resources|routes|Storage|templates|Tests|vendor|uploads|doc's)(?:/|$) - [F,L,NC]
+RewriteRule ^Public/(?!assets(?:/|$)) - [F,L,NC]
 
 # Bloqueia arquivos sensíveis da raiz.
 <FilesMatch "^(?:\.env(?:\..*)?|composer\.(?:json|lock)|phpunit\.xml|phpstan\.neon|test\.bat)$">
     Require all denied
 </FilesMatch>
-
-# Libera os arquivos estáticos públicos.
-RewriteRule ^assets/(.+)$ Public/assets/$1 [L,NC]
 
 # Encaminha as demais URLs para o Slim.
 RewriteCond %{REQUEST_FILENAME} !-f

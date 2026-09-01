@@ -48,8 +48,8 @@ final class UserController
 
         $users = $profile === 'D'
             ? $this->users->findAll()
-            : $this->users->findAllByCompany(
-                (int) $authenticatedUser['cod001']
+            : $this->users->findAllCreatedBy(
+                (int) $authenticatedUser['cod002']
             );
 
         return $this->view->render(
@@ -143,6 +143,7 @@ final class UserController
                 trim((string) ($body['rol002'] ?? 'A'))
             ),
             'sts002' => isset($body['sts002']),
+            'cri002' => (int) $authenticatedUser['cod002'],
         ];
 
         /*
@@ -512,8 +513,8 @@ final class UserController
 
         return (
             (string) $authenticatedUser['rol002'] === 'S' &&
-            (int) $authenticatedUser['cod001'] ===
-                (int) $targetUser['cod001']
+            (int) ($targetUser['cri002'] ?? 0) ===
+                (int) $authenticatedUser['cod002']
         );
     }
 
@@ -531,8 +532,8 @@ final class UserController
         return (
             (string) $authenticatedUser['rol002'] === 'S' &&
             (string) $targetUser['rol002'] === 'A' &&
-            (int) $authenticatedUser['cod001'] ===
-                (int) $targetUser['cod001']
+            (int) ($targetUser['cri002'] ?? 0) ===
+                (int) $authenticatedUser['cod002']
         );
     }
 

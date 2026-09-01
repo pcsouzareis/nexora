@@ -57,7 +57,7 @@ final class CompanyController
         if ($perfil === 'D') {
             $empresas = $this->company->findAll();
         } elseif ($perfil === 'S') {
-            $empresas = $this->supervisorCompanies->findCompanies(
+            $empresas = $this->company->findAllCreatedBy(
                 (int) $user['cod002']
             );
         } else {
@@ -176,6 +176,7 @@ final class CompanyController
             'tel001' => trim((string) ($body['tel001'] ?? '')),
             'log001' => trim((string) ($body['log001'] ?? '')),
             'sts001' => false,
+            'cri001' => (int) $user['cod002'],
         ];
 
         if ($data['des001'] === '') {
@@ -397,10 +398,7 @@ final class CompanyController
         }
 
         if ($perfil === 'S') {
-            return $this->supervisorCompanies->hasActiveCompany(
-                (int) $user['cod002'],
-                (int) $empresa['cod001']
-            );
+            return (int) ($empresa['cri001'] ?? 0) === (int) $user['cod002'];
         }
 
         /* Atendente fica restrito à própria empresa. */
