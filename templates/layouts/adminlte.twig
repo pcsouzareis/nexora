@@ -55,7 +55,7 @@
 			}
 
 			.app-sidebar {
-				background: linear-gradient(180deg, #18cce3 0%, #0ea5e9 100%) !important;
+				background: linear-gradient(180deg, #092b73 0%, #061d5a 100%) !important;
 			}
 
 			.app-sidebar .brand-link,
@@ -64,13 +64,20 @@
 			.app-sidebar .nav-link p,
 			.app-sidebar .nav-link .nav-icon,
 			.app-sidebar .nav-header {
-				color: #061d5a !important;
+				color: #ffffff !important;
 			}
 
 			.app-sidebar .nav-link:hover,
 			.app-sidebar .nav-link.active {
-				background-color: rgba(6, 29, 90, 0.14) !important;
-				color: #061d5a !important;
+				background-color: rgba(255, 255, 255, 0.16) !important;
+				color: #ffffff !important;
+			}
+
+			.app-sidebar .brand-logo {
+				height: 42px;
+				width: auto;
+				max-width: 100%;
+				object-fit: contain;
 			}
 		</style>
 
@@ -144,12 +151,8 @@
 
 					<div class="sidebar-brand">
 
-						<a href="/dashboard" class="brand-link">
-
-							<span class="brand-text fw-light">
-								{{ app_name }}
-							</span>
-
+						<a href="/dashboard" class="brand-link d-flex align-items-center justify-content-center">
+							<img class="brand-logo" src="/assets/images/favicon.png" alt="{{ app_name }}">
 						</a>
 
 					</div>
