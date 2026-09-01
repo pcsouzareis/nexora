@@ -50,8 +50,6 @@ $app = AppFactory::create();
  * ---------------------------------------------------------
  */
 
-$app->addBodyParsingMiddleware();
-
 /* A auditoria fica antes do roteamento para receber a rota já resolvida. */
 $app->add($container->get(AuditMiddleware::class));
 
@@ -72,6 +70,7 @@ $app->add(
 
 $app->add($container->get(\App\Middleware\CurrentCompanyMiddleware::class));
 $app->add($container->get(CsrfMiddleware::class));
+$app->addBodyParsingMiddleware();
 
 
 /*
