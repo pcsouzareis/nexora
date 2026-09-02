@@ -57,6 +57,7 @@
                         <th>Visualizado em</th>
                         <th>Aceito em</th>
                         <th>IP</th>
+                        <th>Documento</th>
                     </tr>
                 </thead>
             </table>
@@ -101,7 +102,22 @@ document.addEventListener('DOMContentLoaded', function () {
             { data: 'versao' },
             { data: 'visualizado_em' },
             { data: 'aceito_em' },
-            { data: 'ip' }
+            { data: 'ip' },
+            {
+                data: 'possui_pdf',
+                orderable: false,
+                searchable: false,
+                render: function (value, type, row) {
+                    if (!value) {
+                        return '<span class="text-muted">Não disponível</span>';
+                    }
+
+                    return '<a class="btn btn-sm btn-outline-primary" href="/contratos/'
+                        + encodeURIComponent(row.cod021)
+                        + '/pdf" target="_blank" rel="noopener" title="Abre o PDF imutável do contrato aceito em uma nova guia.">'
+                        + '<i class="bi bi-file-earmark-pdf"></i> Abrir PDF</a>';
+                }
+            }
         ],
         language: {
             url: 'https://cdn.datatables.net/plug-ins/2.3.0/i18n/pt-BR.json'

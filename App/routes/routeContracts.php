@@ -11,4 +11,6 @@ return static function (App $app): void {
         ->add(AuthMiddleware::class);
     $app->get('/contratos/dados', [ContractAcceptanceController::class, 'data'])
         ->add(AuthMiddleware::class);
+    $app->get('/contratos/{code:[0-9]+}/pdf', [ContractAcceptanceController::class, 'pdf'])
+        ->add(AuthMiddleware::class);
 };

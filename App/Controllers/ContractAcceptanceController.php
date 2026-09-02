@@ -78,6 +78,41 @@ final class ContractAcceptanceController
         ] + $result);
     }
 
+    public function pdf(
+        ServerRequestInterface $request,
+        ResponseInterface $response,
+        array $args
+    ): ResponseInterface {
+        $user = $this->administrator($response);
+
+        if ($user instanceof ResponseInterface) {
+            return $user;
+        }
+
+        $path = $this->contracts->pdfPathByAccessCode((int) ($args['code'] ?? 0));
+        $root = dirname(__DIR__, 2);
+        $prefix = $root . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'aceite' . DIRECTORY_SEPARATOR;
+        $file = $path === null ? '' : $root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $path);
+
+        if (!str_starts_with($file, $prefix) || !is_file($file) || !is_readable($file)) {
+            return $response->withStatus(404);
+        }
+
+        $contents = file_get_contents($file);
+
+        if ($contents === false) {
+            return $response->withStatus(404);
+        }
+
+        $response->getBody()->write($contents);
+
+        return $response
+            ->withHeader('Content-Type', 'application/pdf')
+            ->withHeader('Content-Length', (string) strlen($contents))
+            ->withHeader('Content-Disposition', 'inline; filename="contrato-aceite-' . (int) $args['code'] . '.pdf"')
+            ->withHeader('X-Content-Type-Options', 'nosniff');
+    }
+
     private function administrator(ResponseInterface $response): array|ResponseInterface
     {
         $sessionUser = Session::user();

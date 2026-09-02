@@ -42,7 +42,7 @@ final class LicenseContractAccessRepository
     public function find(int $companyCode, int $userCode): ?array
     {
         $statement = $this->database->pdo()->prepare(<<<'SQL'
-            SELECT cod021, cod001, cod002, cad021, ace021, ver021, ip021
+            SELECT cod021, cod001, cod002, cad021, ace021, ver021, ip021, pdf021
             FROM n021
             WHERE cod001 = :companyCode
               AND cod002 = :userCode
@@ -59,15 +59,18 @@ final class LicenseContractAccessRepository
         int $companyCode,
         int $userCode,
         string $version,
-        ?string $ipAddress
+        ?string $ipAddress,
+        string $pdfPath,
+        string $acceptedAt
     ): void {
         $statement = $this->database->pdo()->prepare(<<<'SQL'
-            INSERT INTO n021 (cod001, cod002, ace021, ver021, ip021)
-            VALUES (:companyCode, :userCode, CURRENT_TIMESTAMP, :version, :ipAddress)
+            INSERT INTO n021 (cod001, cod002, ace021, ver021, ip021, pdf021)
+            VALUES (:companyCode, :userCode, :acceptedAt, :version, :ipAddress, :pdfPath)
             ON CONFLICT (cod001, cod002) DO UPDATE
             SET ace021 = EXCLUDED.ace021,
                 ver021 = EXCLUDED.ver021,
-                ip021 = EXCLUDED.ip021
+                ip021 = EXCLUDED.ip021,
+                pdf021 = EXCLUDED.pdf021
             WHERE n021.ace021 IS NULL
         SQL);
 
@@ -76,7 +79,26 @@ final class LicenseContractAccessRepository
             'userCode' => $userCode,
             'version' => $version,
             'ipAddress' => $ipAddress,
+            'pdfPath' => $pdfPath,
+            'acceptedAt' => $acceptedAt,
         ]);
+    }
+
+    public function pdfPathByAccessCode(int $accessCode): ?string
+    {
+        $statement = $this->database->pdo()->prepare(<<<'SQL'
+            SELECT pdf021
+            FROM n021
+            WHERE cod021 = :accessCode
+              AND ace021 IS NOT NULL
+              AND pdf021 IS NOT NULL
+            LIMIT 1
+        SQL);
+
+        $statement->execute(['accessCode' => $accessCode]);
+        $path = $statement->fetchColumn();
+
+        return is_string($path) && $path !== '' ? $path : null;
     }
 
     public function filters(): array
@@ -117,7 +139,7 @@ final class LicenseContractAccessRepository
 
         $columns = [
             0 => 'e.des001', 1 => 'u.des002', 2 => 'a.ace021', 3 => 'a.ver021',
-            4 => 'a.cad021', 5 => 'a.ace021', 6 => 'a.ip021',
+            4 => 'a.cad021', 5 => 'a.ace021', 6 => 'a.ip021', 7 => 'a.pdf021',
         ];
         $order = $columns[$orderColumn] ?? 'a.cad021';
         $direction = strtolower($orderDirection) === 'asc' ? 'ASC' : 'DESC';
@@ -132,7 +154,8 @@ final class LicenseContractAccessRepository
                 to_char(a.cad021 AT TIME ZONE 'America/Fortaleza', 'DD/MM/YYYY HH24:MI:SS') AS visualizado_em,
                 CASE WHEN a.ace021 IS NULL THEN '—'
                     ELSE to_char(a.ace021 AT TIME ZONE 'America/Fortaleza', 'DD/MM/YYYY HH24:MI:SS') END AS aceito_em,
-                COALESCE(a.ip021, '—') AS ip
+                COALESCE(a.ip021, '—') AS ip,
+                (a.pdf021 IS NOT NULL) AS possui_pdf
             FROM n021 a
             INNER JOIN n001 e ON e.cod001 = a.cod001
             INNER JOIN n002 u ON u.cod002 = a.cod002

@@ -8,6 +8,7 @@ use App\Repositories\LicenseContractAccessRepository;
 use App\Repositories\AuditRepository;
 use App\Repositories\UserRepository;
 use App\Services\CurrentCompanyContext;
+use App\Services\LicenseContractPdfGenerator;
 use App\Support\Session;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -19,7 +20,8 @@ final class LicenseContractController
         private readonly UserRepository $users,
         private readonly CurrentCompanyContext $companies,
         private readonly LicenseContractAccessRepository $accesses,
-        private readonly AuditRepository $audit
+        private readonly AuditRepository $audit,
+        private readonly LicenseContractPdfGenerator $pdfGenerator
     ) {}
 
     public function show(
@@ -56,38 +58,8 @@ final class LicenseContractController
             (int) $user['cod002']
         );
 
-        $templatePath = dirname(__DIR__, 2)
-            . '/Public/assets/contrato/contrato_licenca_nexora.html';
-
-        $template = file_get_contents($templatePath);
-
-        if ($template === false) {
-            throw new \RuntimeException('Modelo do contrato de licença não encontrado.');
-        }
-
         $contractVersion = $this->environment('CONTRACT_VERSION', '1.0');
-
-        $html = strtr($template, [
-            '{{VERSAO_CONTRATO}}' => $this->escape($contractVersion),
-            '{{VALOR_IMPLANTACAO}}' => $this->escape(
-                $this->environment('CONTRACT_IMPLEMENTATION_VALUE', 'R$ 2.000,00 (dois mil reais)')
-            ),
-            '{{RAZAO_SOCIAL_LICENCIANTE}}' => $this->escape(
-                $this->environment('CONTRACT_LICENSOR_NAME', (string) ($_ENV['APP_NAME'] ?? 'Nexora'))
-            ),
-            '{{CPF_CNPJ_LICENCIANTE}}' => $this->escape(
-                $this->environment('CONTRACT_LICENSOR_DOCUMENT', 'Não informado')
-            ),
-            '{{ENDERECO_LICENCIANTE}}' => $this->escape(
-                $this->environment('CONTRACT_LICENSOR_ADDRESS', 'Não informado')
-            ),
-            '{{RAZAO_SOCIAL_CLIENTE}}' => $this->escape((string) ($company['des001'] ?? 'Não informado')),
-            '{{CPF_CNPJ_CLIENTE}}' => $this->escape($this->valueOrDefault($company['doc001'] ?? null)),
-            // n001 ainda não possui um campo de endereço. Não use log001, pois ele armazena a logo.
-            '{{ENDERECO_CLIENTE}}' => $this->escape('Endereço não informado'),
-            '{{CIDADE_FORO}}' => $this->escape($this->environment('CONTRACT_FORUM_CITY', 'Não informado')),
-            '{{UF_FORO}}' => $this->escape($this->environment('CONTRACT_FORUM_STATE', 'Não informado')),
-        ]);
+        $html = $this->contractHtml($company, $contractVersion);
 
         $access = $this->accesses->find(
             (int) $company['cod001'],
@@ -135,11 +107,41 @@ final class LicenseContractController
             return $response->withHeader('Location', '/dashboard')->withStatus(302);
         }
 
+        $access = $this->accesses->find((int) $company['cod001'], (int) $user['cod002']);
+
+        if (($access['ace021'] ?? null) !== null) {
+            return $response->withHeader('Location', '/dashboard')->withStatus(302);
+        }
+
+        $version = $this->environment('CONTRACT_VERSION', '1.0');
+        $acceptedAt = new \DateTimeImmutable('now', new \DateTimeZone('America/Fortaleza'));
+        $filename = sprintf(
+            'contrato-empresa-%d-supervisor-%d-%s-%s.pdf',
+            (int) $company['cod001'],
+            (int) $user['cod002'],
+            $acceptedAt->format('YmdHis'),
+            bin2hex(random_bytes(8))
+        );
+        $ipAddress = $this->clientIp($request);
+        $pdfPath = $this->pdfGenerator->generate(
+            $this->contractHtml($company, $version),
+            $filename,
+            [
+                'name' => (string) $user['des002'],
+                'company' => (string) $company['des001'],
+                'version' => $version,
+                'accepted_at' => $acceptedAt->format('d/m/Y H:i:s'),
+                'ip' => $ipAddress ?? 'Não informado',
+            ]
+        );
+
         $this->accesses->accept(
             (int) $company['cod001'],
             (int) $user['cod002'],
-            $this->environment('CONTRACT_VERSION', '1.0'),
-            $this->clientIp($request)
+            $version,
+            $ipAddress,
+            $pdfPath,
+            $acceptedAt->format('Y-m-d H:i:sP')
         );
 
         $this->audit->record(
@@ -148,8 +150,8 @@ final class LicenseContractController
             'ACCEPT',
             'Contrato de licença',
             null,
-            'Aceite formal do contrato, versão ' . $this->environment('CONTRACT_VERSION', '1.0') . '.',
-            $this->clientIp($request)
+            'Aceite formal do contrato, versão ' . $version . '. PDF: ' . $pdfPath,
+            $ipAddress
         );
 
         return $response->withHeader('Location', '/dashboard')->withStatus(302);
@@ -184,6 +186,30 @@ final class LicenseContractController
                 </form>
             </section>
         HTML;
+    }
+
+    private function contractHtml(array $company, string $contractVersion): string
+    {
+        $templatePath = dirname(__DIR__, 2)
+            . '/Public/assets/contrato/contrato_licenca_nexora.html';
+        $template = file_get_contents($templatePath);
+
+        if ($template === false) {
+            throw new \RuntimeException('Modelo do contrato de licença não encontrado.');
+        }
+
+        return strtr($template, [
+            '{{VERSAO_CONTRATO}}' => $this->escape($contractVersion),
+            '{{VALOR_IMPLANTACAO}}' => $this->escape($this->environment('CONTRACT_IMPLEMENTATION_VALUE', 'R$ 2.000,00 (dois mil reais)')),
+            '{{RAZAO_SOCIAL_LICENCIANTE}}' => $this->escape($this->environment('CONTRACT_LICENSOR_NAME', (string) ($_ENV['APP_NAME'] ?? 'Nexora'))),
+            '{{CPF_CNPJ_LICENCIANTE}}' => $this->escape($this->environment('CONTRACT_LICENSOR_DOCUMENT', 'Não informado')),
+            '{{ENDERECO_LICENCIANTE}}' => $this->escape($this->environment('CONTRACT_LICENSOR_ADDRESS', 'Não informado')),
+            '{{RAZAO_SOCIAL_CLIENTE}}' => $this->escape((string) ($company['des001'] ?? 'Não informado')),
+            '{{CPF_CNPJ_CLIENTE}}' => $this->escape($this->valueOrDefault($company['doc001'] ?? null)),
+            '{{ENDERECO_CLIENTE}}' => $this->escape('Endereço não informado'),
+            '{{CIDADE_FORO}}' => $this->escape($this->environment('CONTRACT_FORUM_CITY', 'Não informado')),
+            '{{UF_FORO}}' => $this->escape($this->environment('CONTRACT_FORUM_STATE', 'Não informado')),
+        ]);
     }
 
     private function clientIp(ServerRequestInterface $request): ?string

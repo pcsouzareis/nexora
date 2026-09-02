@@ -4,6 +4,7 @@
 /doc's
 /Storage/logs/*
 /Storage/uploads/*
+/uploads/aceite/*
 
 !.gitkeep
 
