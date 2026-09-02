@@ -73,7 +73,7 @@ final class AuthController
 
             if (
                 (string) $user['rol002'] === 'S'
-                && $this->contractAccesses->isFirstAccess(
+                && !$this->contractAccesses->isAccepted(
                     (int) $user['cod001'],
                     (int) $user['cod002']
                 )

@@ -9,4 +9,6 @@ use Slim\App;
 return static function (App $app): void {
     $app->get('/contrato/licenca', [LicenseContractController::class, 'show'])
         ->add(AuthMiddleware::class);
+    $app->post('/contrato/licenca/aceite', [LicenseContractController::class, 'accept'])
+        ->add(AuthMiddleware::class);
 };
