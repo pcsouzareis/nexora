@@ -91,7 +91,7 @@ final class ContractAcceptanceController
 
         $path = $this->contracts->pdfPathByAccessCode((int) ($args['code'] ?? 0));
         $root = dirname(__DIR__, 2);
-        $prefix = $root . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'aceite' . DIRECTORY_SEPARATOR;
+        $prefix = $root . DIRECTORY_SEPARATOR . 'Storage' . DIRECTORY_SEPARATOR . 'documents' . DIRECTORY_SEPARATOR . 'aceite' . DIRECTORY_SEPARATOR;
         $file = $path === null ? '' : $root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $path);
 
         if (!str_starts_with($file, $prefix) || !is_file($file) || !is_readable($file)) {

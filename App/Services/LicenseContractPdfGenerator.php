@@ -21,7 +21,7 @@ final class LicenseContractPdfGenerator
         $content = preg_replace('~<p\\s+class="actions">.*?</p>~si', '', $matches[1]) ?? $matches[1];
         $content .= $this->acceptanceCertificate($acceptance);
 
-        $directory = dirname(__DIR__, 2) . '/uploads/aceite';
+        $directory = dirname(__DIR__, 2) . '/Storage/documents/aceite';
 
         if (!is_dir($directory) && !mkdir($directory, 0750, true) && !is_dir($directory)) {
             throw new \RuntimeException('Não foi possível criar o diretório dos contratos aceitos.');
@@ -50,7 +50,7 @@ final class LicenseContractPdfGenerator
             throw new \RuntimeException('O PDF do contrato não foi gerado corretamente.');
         }
 
-        return 'uploads/aceite/' . $filename;
+        return 'Storage/documents/aceite/' . $filename;
     }
 
     /** @param array{name: string, company: string, version: string, accepted_at: string, ip: string} $acceptance */
