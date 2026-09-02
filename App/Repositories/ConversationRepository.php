@@ -391,22 +391,23 @@ final class ConversationRepository
 
     private function createQueueHistory(PDO $pdo, int $companyCode, int $conversationCode, ?int $userCode, string $reason, string $status): void
     {
-        $statement = $pdo->prepare(<<<'SQL'
+        $acceptedAt = $status === 'Aceito' ? 'CURRENT_TIMESTAMP' : 'NULL';
+        $sql = <<<SQL
             INSERT INTO n011 (cod008, cod010, cod002, mot011, sts011, ace011)
-            SELECT :conversationCode, q.cod010, :userCode, :reason, :status, :acceptedAt
+            SELECT :conversationCode, q.cod010, :userCode, :reason, :status, {$acceptedAt}
             FROM n010 q
             WHERE q.cod001 = :companyCode
               AND q.sts010 = TRUE
             ORDER BY q.pri010, q.cod010
             LIMIT 1
-        SQL);
+        SQL;
+        $statement = $pdo->prepare($sql);
         $statement->execute([
             'conversationCode' => $conversationCode,
             'companyCode' => $companyCode,
             'userCode' => $userCode,
             'reason' => $reason,
             'status' => $status,
-            'acceptedAt' => $status === 'Aceito' ? (new \DateTimeImmutable())->format('Y-m-d H:i:sP') : null,
         ]);
     }
 }
