@@ -49,6 +49,7 @@ final class CurrentCompanyMiddleware
                     'channels' => Permission::allows($user, Permission::CHANNEL_ACCESS),
                     'integrations' => in_array((string) $user['rol002'], ['D', 'S'], true),
                     'audit' => Permission::allows($user, Permission::AUDIT_ACCESS),
+                    'contracts' => (string) $user['rol002'] === 'D',
                 ];
             }
         }

@@ -121,6 +121,23 @@ final class ConversationRepository
         ];
     }
 
+    public function countAssignedTo(int $companyCode, int $userCode): int
+    {
+        $statement = $this->database->pdo()->prepare(<<<'SQL'
+            SELECT COUNT(*)
+            FROM n008
+            WHERE cod001 = :companyCode
+              AND cod002 = :userCode
+              AND sts008 IN ('Aguardando', 'Em Atendimento')
+        SQL);
+        $statement->execute([
+            'companyCode' => $companyCode,
+            'userCode' => $userCode,
+        ]);
+
+        return (int) $statement->fetchColumn();
+    }
+
     public function take(int $companyCode, int $conversationCode, int $userCode): bool
     {
         $statement = $this->database->pdo()->prepare(<<<'SQL'
@@ -129,7 +146,10 @@ final class ConversationRepository
                 sts008 = 'Em Atendimento'
             WHERE cod008 = :conversationCode
               AND cod001 = :companyCode
-              AND sts008 IN ('Aberta', 'Aguardando', 'Em Atendimento')
+              AND (
+                  (cod002 IS NULL AND sts008 IN ('Aberta', 'Aguardando'))
+                  OR (cod002 = :userCode AND sts008 IN ('Aguardando', 'Em Atendimento'))
+              )
         SQL);
         $statement->execute([
             'companyCode' => $companyCode,
@@ -172,7 +192,10 @@ final class ConversationRepository
                 SET cod002 = :userCode, sts008 = 'Em Atendimento'
                 WHERE cod008 = :conversationCode
                   AND cod001 = :companyCode
-                  AND sts008 IN ('Aberta', 'Aguardando', 'Em Atendimento')
+                  AND (
+                      (cod002 IS NULL AND sts008 IN ('Aberta', 'Aguardando'))
+                      OR (cod002 = :userCode AND sts008 IN ('Aguardando', 'Em Atendimento'))
+                  )
             SQL);
             $conversation->execute([
                 'companyCode' => $companyCode,

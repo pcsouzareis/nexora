@@ -31,9 +31,10 @@
                         <p class="text-muted text-center">Esta conversa ainda não possui mensagens.</p>
                     {% endfor %}
                 </div>
-                {% if can_manage and conversa.sts008 not in ['Encerrada', 'Cancelada'] %}
+                {% if can_manage and conversa.sts008 not in ['Encerrada', 'Cancelada'] and (is_owner or can_take) %}
                     <form method="post" action="/conversas/{{ conversa.cod008 }}/responder">
                         <div class="card-footer">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                             <label for="message" class="form-label">Resposta do atendente</label>
                             <textarea id="message" name="message" class="form-control" rows="3" maxlength="10000" required placeholder="Digite a resposta que será registrada para o cliente."></textarea>
                             <div class="text-end mt-2"><button class="btn btn-primary"><i class="bi bi-send me-1"></i>Registrar resposta</button></div>
@@ -54,9 +55,13 @@
                         <dt>Telefone</dt><dd>{{ conversa.tel007|default('Não informado') }}</dd>
                         <dt>Início</dt><dd>{{ conversa.ini008|date('d/m/Y H:i') }}</dd>
                     </dl>
-                    {% if can_manage and conversa.sts008 not in ['Encerrada', 'Cancelada'] %}
-                        <form method="post" action="/conversas/{{ conversa.cod008 }}/assumir" class="d-grid mb-2"><button class="btn btn-outline-primary">Assumir atendimento</button></form>
-                        <form method="post" action="/conversas/{{ conversa.cod008 }}/encerrar" class="d-grid"><button class="btn btn-outline-danger">Encerrar conversa</button></form>
+                    {% if can_take and conversa.sts008 not in ['Encerrada', 'Cancelada'] %}
+                        <form method="post" action="/conversas/{{ conversa.cod008 }}/assumir" class="d-grid mb-2"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button class="btn btn-outline-primary">Assumir atendimento</button></form>
+                    {% elseif conversa.atendente and not is_owner %}
+                        <p class="small text-muted mt-3 mb-0">Este atendimento já foi assumido por {{ conversa.atendente }}.</p>
+                    {% endif %}
+                    {% if can_manage and conversa.sts008 not in ['Encerrada', 'Cancelada'] and (is_owner or usuario.perfil in ['D', 'S']) %}
+                        <form method="post" action="/conversas/{{ conversa.cod008 }}/encerrar" class="d-grid"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button class="btn btn-outline-danger">Encerrar conversa</button></form>
                     {% endif %}
                 </div>
             </div>

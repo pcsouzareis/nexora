@@ -53,6 +53,10 @@ final class ConversationController
             'inicio' => $startDate === '' ? '' : $startDateInput,
             'status_opcoes' => self::STATUSES,
             'fila' => $this->conversations->queueSummary($this->companies->companyCode($user)),
+            'minhas_conversas' => $this->conversations->countAssignedTo(
+                $this->companies->companyCode($user),
+                (int) $user['cod002']
+            ),
         ]));
     }
 
@@ -74,6 +78,9 @@ final class ConversationController
             'conversa' => $conversation,
             'mensagens' => $this->conversations->findMessages((int) $conversation['cod008']),
             'can_manage' => Permission::allows($user, Permission::CONVERSATION_UPDATE),
+            'can_take' => Permission::allows($user, Permission::CONVERSATION_UPDATE)
+                && (int) ($conversation['cod002'] ?? 0) === 0,
+            'is_owner' => (int) ($conversation['cod002'] ?? 0) === (int) $user['cod002'],
         ]));
     }
 
@@ -81,8 +88,10 @@ final class ConversationController
     {
         $user = $this->manager($response);
         if ($user instanceof ResponseInterface) return $user;
-        $this->conversations->take($this->companies->companyCode($user), (int) ($args['id'] ?? 0), (int) $user['cod002']);
-        $this->audit->record($this->companies->companyCode($user), (int) $user['cod002'], 'UPDATE', 'Conversa', (int) ($args['id'] ?? 0), 'Atendimento assumido.', $this->clientIp($request));
+        $taken = $this->conversations->take($this->companies->companyCode($user), (int) ($args['id'] ?? 0), (int) $user['cod002']);
+        if ($taken) {
+            $this->audit->record($this->companies->companyCode($user), (int) $user['cod002'], 'UPDATE', 'Conversa', (int) ($args['id'] ?? 0), 'Atendimento assumido.', $this->clientIp($request));
+        }
         return $this->redirect($response, '/conversas/' . (int) ($args['id'] ?? 0));
     }
 
@@ -107,6 +116,8 @@ final class ConversationController
     {
         $user = $this->manager($response);
         if ($user instanceof ResponseInterface) return $user;
+        $conversation = $this->conversation($user, (int) ($args['id'] ?? 0));
+        if ($conversation === null || (!$this->canManageConversation($user, $conversation))) return $this->redirect($response, '/conversas');
         $this->conversations->close($this->companies->companyCode($user), (int) ($args['id'] ?? 0));
         $this->audit->record($this->companies->companyCode($user), (int) $user['cod002'], 'CLOSE', 'Conversa', (int) ($args['id'] ?? 0), 'Conversa encerrada.', $this->clientIp($request));
         return $this->redirect($response, '/conversas/' . (int) ($args['id'] ?? 0));
@@ -131,6 +142,15 @@ final class ConversationController
     private function conversation(array $user, int $code): ?array
     {
         return $this->conversations->findByCompany($this->companies->companyCode($user), $code);
+    }
+
+    private function canManageConversation(array $user, array $conversation): bool
+    {
+        if (in_array((string) $user['rol002'], ['D', 'S'], true)) {
+            return true;
+        }
+
+        return (int) ($conversation['cod002'] ?? 0) === (int) $user['cod002'];
     }
 
     private function context(array $user, array $data): array

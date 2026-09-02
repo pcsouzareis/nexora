@@ -11,6 +11,7 @@ return static function (App $app): void {
         __DIR__ . '/routeAuth.php',
         __DIR__ . '/routeCurrentCompany.php',
         __DIR__ . '/routeLicenseContract.php',
+        __DIR__ . '/routeContracts.php',
         __DIR__ . '/routeDashboard.php',
         __DIR__ . '/routeAI.php',
         __DIR__ . '/routeWebhookTest.php',

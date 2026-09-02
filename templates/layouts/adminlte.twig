@@ -183,8 +183,16 @@
 
 								</li>
 
-								{% if permissoes_menu.companies|default(false) or permissoes_menu.users|default(false) or permissoes_menu.knowledge|default(false) or permissoes_menu.ai_configuration|default(false) or permissoes_menu.webhook_test|default(false) or permissoes_menu.conversations|default(false) or permissoes_menu.channels|default(false) or permissoes_menu.integrations|default(false) or permissoes_menu.audit|default(false) %}
-									<li class="nav-header">Opção do sistema</li>
+								{% if permissoes_menu.conversations|default(false) %}
+									<li class="nav-item"><a href="/conversas" class="nav-link"><i class="nav-icon bi bi-chat-dots"></i><p>Conversas</p></a></li>
+								{% endif %}
+
+								{% if permissoes_menu.companies|default(false) or permissoes_menu.users|default(false) or permissoes_menu.knowledge|default(false) or permissoes_menu.ai_configuration|default(false) or permissoes_menu.webhook_test|default(false) or permissoes_menu.channels|default(false) or permissoes_menu.integrations|default(false) or permissoes_menu.audit|default(false) or permissoes_menu.contracts|default(false) %}
+									<li class="nav-header">Menu Sistema</li>
+								{% endif %}
+
+								{% if permissoes_menu.companies|default(false) or permissoes_menu.users|default(false) or permissoes_menu.channels|default(false) or permissoes_menu.knowledge|default(false) %}
+									<li class="nav-header">Cadastro</li>
 								{% endif %}
 
 								{% if permissoes_menu.companies|default(false) %}
@@ -199,20 +207,12 @@
 									<li class="nav-item"><a href="/conhecimento" class="nav-link"><i class="nav-icon bi bi-book"></i><p>Aprendizado da IA</p></a></li>
 								{% endif %}
 
-								{% if permissoes_menu.ai_configuration|default(false) %}
-									<li class="nav-item"><a href="/configuracoes/ia" class="nav-link"><i class="nav-icon bi bi-stars"></i><p>Configuração da IA</p></a></li>
-								{% endif %}
-
-								{% if permissoes_menu.webhook_test|default(false) %}
-									<li class="nav-item"><a href="/testes/webhook" class="nav-link"><i class="nav-icon bi bi-send-check"></i><p>Teste do webhook</p></a></li>
-								{% endif %}
-
-								{% if permissoes_menu.conversations|default(false) %}
-									<li class="nav-item"><a href="/conversas" class="nav-link"><i class="nav-icon bi bi-chat-dots"></i><p>Conversas</p></a></li>
-								{% endif %}
-
 								{% if permissoes_menu.channels|default(false) %}
 									<li class="nav-item"><a href="/canais" class="nav-link"><i class="nav-icon bi bi-broadcast"></i><p>Canais</p></a></li>
+								{% endif %}
+
+								{% if permissoes_menu.integrations|default(false) or permissoes_menu.audit|default(false) or permissoes_menu.contracts|default(false) %}
+									<li class="nav-header">Administração</li>
 								{% endif %}
 
 								{% if permissoes_menu.integrations|default(false) %}
@@ -223,6 +223,11 @@
 									<li class="nav-item"><a href="/auditoria" class="nav-link"><i class="nav-icon bi bi-journal-text"></i><p>Auditoria</p></a></li>
 								{% endif %}
 
+								{% if permissoes_menu.contracts|default(false) %}
+									<li class="nav-item"><a href="/contratos" class="nav-link"><i class="nav-icon bi bi-file-earmark-check"></i><p>Controle de Aceite</p></a></li>
+								{% endif %}
+
+								<li class="nav-header">Configuração</li>
 
 								<li class="nav-item">
 
@@ -237,6 +242,14 @@
 									</a>
 
 								</li>
+
+								{% if permissoes_menu.ai_configuration|default(false) %}
+									<li class="nav-item"><a href="/configuracoes/ia" class="nav-link"><i class="nav-icon bi bi-stars"></i><p>Configuração da IA</p></a></li>
+								{% endif %}
+
+								{% if permissoes_menu.webhook_test|default(false) %}
+									<li class="nav-item"><a href="/testes/webhook" class="nav-link"><i class="nav-icon bi bi-send-check"></i><p>Teste do Webhook</p></a></li>
+								{% endif %}
 
 								<!-- Logout -->
 

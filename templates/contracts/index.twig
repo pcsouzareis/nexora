@@ -1,0 +1,122 @@
+{% extends 'layouts/adminlte.twig' %}
+
+{% block title %}Contratos e Aceites | {{ app_name }}{% endblock %}
+{% block page_title %}Contratos e Aceites{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="https://cdn.datatables.net/3.0.3/css/dataTables.dataTables.css">
+{% endblock %}
+
+{% block content %}
+<div class="card card-outline card-primary">
+    <div class="card-header">
+        <h3 class="card-title"><i class="bi bi-file-earmark-check me-2"></i>Controle de contratos</h3>
+    </div>
+    <div class="card-body">
+        <form id="contract-filters" class="row g-3 mb-3">
+            <div class="col-md-4">
+                <label class="form-label" for="contract-company">Empresa</label>
+                <select id="contract-company" class="form-select" title="Filtra os registros pela empresa vinculada ao contrato.">
+                    <option value="">Todas as empresas</option>
+                    {% for company in filtros.companies %}
+                        <option value="{{ company.cod001 }}">{{ company.des001 }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label" for="contract-user">Supervisor</label>
+                <select id="contract-user" class="form-select" title="Filtra pelo supervisor responsável pela visualização ou aceite.">
+                    <option value="">Todos os supervisores</option>
+                    {% for user in filtros.users %}
+                        <option value="{{ user.cod002 }}">{{ user.des002 }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label" for="contract-status">Situação</label>
+                <select id="contract-status" class="form-select" title="Exibe contratos pendentes de aceite ou já aceitos.">
+                    <option value="">Todas</option>
+                    <option value="pending">Pendente</option>
+                    <option value="accepted">Aceito</option>
+                </select>
+            </div>
+            <div class="col-md-2 d-flex align-items-end gap-2">
+                <button type="submit" class="btn btn-primary"><i class="bi bi-funnel me-1"></i>Filtrar</button>
+                <button id="contract-clear" type="button" class="btn btn-outline-secondary">Limpar</button>
+            </div>
+        </form>
+
+        <div class="table-responsive">
+            <table id="contract-table" class="table table-hover align-middle w-100">
+                <thead>
+                    <tr>
+                        <th>Empresa</th>
+                        <th>Supervisor</th>
+                        <th>Situação</th>
+                        <th>Versão</th>
+                        <th>Visualizado em</th>
+                        <th>Aceito em</th>
+                        <th>IP</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.datatables.net/3.0.3/js/dataTables.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const value = function (id) {
+        return document.getElementById(id).value;
+    };
+
+    const table = new DataTable('#contract-table', {
+        serverSide: true,
+        processing: true,
+        pageLength: 25,
+        lengthMenu: [25, 50, 100],
+        searchDelay: 350,
+        ajax: {
+            url: '/contratos/dados',
+            data: function (data) {
+                data.company = value('contract-company');
+                data.user = value('contract-user');
+                data.status = value('contract-status');
+            }
+        },
+        columns: [
+            { data: 'empresa' },
+            { data: 'supervisor' },
+            {
+                data: 'status',
+                render: function (value) {
+                    return value === 'Aceito'
+                        ? '<span class="badge text-bg-success">Aceito</span>'
+                        : '<span class="badge text-bg-warning">Pendente</span>';
+                }
+            },
+            { data: 'versao' },
+            { data: 'visualizado_em' },
+            { data: 'aceito_em' },
+            { data: 'ip' }
+        ],
+        language: {
+            url: 'https://cdn.datatables.net/plug-ins/2.3.0/i18n/pt-BR.json'
+        }
+    });
+
+    document.getElementById('contract-filters').addEventListener('submit', function (event) {
+        event.preventDefault();
+        table.ajax.reload();
+    });
+
+    document.getElementById('contract-clear').addEventListener('click', function () {
+        document.getElementById('contract-filters').reset();
+        table.ajax.reload();
+    });
+});
+</script>
+{% endblock %}
