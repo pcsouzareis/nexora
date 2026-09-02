@@ -232,7 +232,11 @@ final class WebhookRepository
 
     public function markForHumanHandoff(int $companyCode, int $conversationCode): void
     {
-        $statement = $this->database->pdo()->prepare(<<<'SQL'
+        $pdo = $this->database->pdo();
+        $pdo->beginTransaction();
+
+        try {
+        $statement = $pdo->prepare(<<<'SQL'
             UPDATE n008
             SET cod002 = NULL,
                 sts008 = 'Aguardando'
@@ -245,6 +249,37 @@ final class WebhookRepository
             'companyCode' => $companyCode,
             'conversationCode' => $conversationCode,
         ]);
+
+        if ($statement->rowCount() === 1) {
+            $history = $pdo->prepare(<<<'SQL'
+                INSERT INTO n011 (cod008, cod010, mot011, sts011)
+                SELECT :conversationCode, q.cod010, 'Encaminhada pela IA para atendimento humano.', 'Pendente'
+                FROM n010 q
+                WHERE q.cod001 = :companyCode
+                  AND q.sts010 = TRUE
+                  AND NOT EXISTS (
+                      SELECT 1 FROM n011 h
+                      WHERE h.cod008 = :historyConversationCode
+                        AND h.sts011 IN ('Pendente', 'Aceito')
+                  )
+                ORDER BY q.pri010, q.cod010
+                LIMIT 1
+            SQL);
+            $history->execute([
+                'companyCode' => $companyCode,
+                'conversationCode' => $conversationCode,
+                'historyConversationCode' => $conversationCode,
+            ]);
+        }
+
+        $pdo->commit();
+        } catch (\Throwable $exception) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+
+            throw $exception;
+        }
     }
 
     public function createChatbotReply(

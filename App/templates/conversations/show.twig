@@ -65,6 +65,38 @@
                     {% endif %}
                 </div>
             </div>
+            {% if can_manage and conversa.sts008 not in ['Encerrada', 'Cancelada'] and (is_owner or usuario.perfil in ['D', 'S']) and filas %}
+                <div class="card">
+                    <div class="card-header"><h3 class="card-title">Transferir atendimento</h3></div>
+                    <form method="post" action="/conversas/{{ conversa.cod008 }}/transferir">
+                        <div class="card-body">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                            <label class="form-label" for="cod010">Nova fila</label>
+                            <select id="cod010" name="cod010" class="form-select" required title="A conversa volta para aguardando e ficará disponível para a fila selecionada.">
+                                {% for fila in filas %}<option value="{{ fila.cod010 }}">{{ fila.des010 }}{% if fila.sla010 %} · SLA {{ fila.sla010 }} min{% endif %}</option>{% endfor %}
+                            </select>
+                            <label class="form-label mt-3" for="mot011">Motivo da transferência</label>
+                            <textarea id="mot011" name="mot011" class="form-control" rows="2" maxlength="1000" placeholder="Opcional: informe o motivo para o histórico da fila." title="O motivo ficará registrado no histórico de atendimento."></textarea>
+                        </div>
+                        <div class="card-footer d-grid"><button class="btn btn-outline-warning"><i class="bi bi-arrow-left-right me-1"></i>Transferir para fila</button></div>
+                    </form>
+                </div>
+            {% endif %}
+            <div class="card">
+                <div class="card-header"><h3 class="card-title">Histórico da fila</h3></div>
+                <div class="list-group list-group-flush">
+                    {% for item in historico_fila %}
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between gap-2"><strong>{{ item.fila }}</strong><span class="badge text-bg-{{ item.sts011 == 'Aceito' ? 'primary' : (item.sts011 == 'Encerrado' ? 'secondary' : (item.sts011 == 'Transferido' ? 'warning' : 'info')) }}">{{ item.sts011 }}</span></div>
+                            <div class="small text-muted">Encaminhado: {{ item.enc011|date('d/m/Y H:i') }}{% if item.ace011 %} · Aceito: {{ item.ace011|date('d/m/Y H:i') }}{% endif %}</div>
+                            {% if item.atendente %}<div class="small">Atendente: {{ item.atendente }}</div>{% endif %}
+                            <div class="small mt-1">{{ item.mot011 }}</div>
+                        </div>
+                    {% else %}
+                        <div class="list-group-item text-muted">Não há histórico de fila para esta conversa.</div>
+                    {% endfor %}
+                </div>
+            </div>
         </div>
     </div>
 {% endblock %}

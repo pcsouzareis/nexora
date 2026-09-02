@@ -76,7 +76,11 @@ final class WebchatRepository
 
     public function closeSession(int $channelCode, int $companyCode, string $sessionId): bool
     {
-        $statement = $this->database->pdo()->prepare(<<<'SQL'
+        $pdo = $this->database->pdo();
+        $pdo->beginTransaction();
+
+        try {
+        $statement = $pdo->prepare(<<<'SQL'
             UPDATE n008 c
             SET sts008 = 'Encerrada', fim008 = CURRENT_TIMESTAMP, web008 = NULL
             FROM n007 cli
@@ -93,6 +97,61 @@ final class WebchatRepository
             'externalId' => 'web:' . $sessionId,
             'conversationId' => 'web:' . $sessionId,
         ]);
-        return $statement->rowCount() === 1;
+
+        if ($statement->rowCount() !== 1) {
+            $pdo->rollBack();
+            return false;
+        }
+
+        $conversation = $pdo->prepare(<<<'SQL'
+            SELECT c.cod008
+            FROM n008 c
+            INNER JOIN n007 cli ON cli.cod007 = c.cod007
+            WHERE c.cod003 = :channelCode
+              AND c.cod001 = :companyCode
+              AND cli.ide007 = :externalId
+              AND c.ide008 = :conversationId
+            LIMIT 1
+        SQL);
+        $conversation->execute([
+            'channelCode' => $channelCode,
+            'companyCode' => $companyCode,
+            'externalId' => 'web:' . $sessionId,
+            'conversationId' => 'web:' . $sessionId,
+        ]);
+        $conversationCode = (int) $conversation->fetchColumn();
+
+        $history = $pdo->prepare(<<<'SQL'
+            UPDATE n011
+            SET sts011 = 'Encerrado'
+            WHERE cod011 = (
+                SELECT cod011 FROM n011
+                WHERE cod008 = :conversationCode AND sts011 IN ('Pendente', 'Aceito')
+                ORDER BY enc011 DESC, cod011 DESC LIMIT 1
+            )
+        SQL);
+        $history->execute(['conversationCode' => $conversationCode]);
+
+        if ($history->rowCount() === 0) {
+            $entry = $pdo->prepare(<<<'SQL'
+                INSERT INTO n011 (cod008, cod010, mot011, sts011)
+                SELECT :conversationCode, q.cod010, 'Encerrada pelo cliente no Webchat.', 'Encerrado'
+                FROM n010 q
+                WHERE q.cod001 = :companyCode AND q.sts010 = TRUE
+                ORDER BY q.pri010, q.cod010
+                LIMIT 1
+            SQL);
+            $entry->execute(['conversationCode' => $conversationCode, 'companyCode' => $companyCode]);
+        }
+
+        $pdo->commit();
+        return true;
+        } catch (\Throwable $exception) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+
+            throw $exception;
+        }
     }
 }

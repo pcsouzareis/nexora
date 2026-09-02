@@ -13,4 +13,5 @@ return static function (App $app): void {
     $app->post('/conversas/{id:[0-9]+}/assumir', [ConversationController::class, 'take'])->add(AuthMiddleware::class);
     $app->post('/conversas/{id:[0-9]+}/responder', [ConversationController::class, 'reply'])->add(AuthMiddleware::class);
     $app->post('/conversas/{id:[0-9]+}/encerrar', [ConversationController::class, 'close'])->add(AuthMiddleware::class);
+    $app->post('/conversas/{id:[0-9]+}/transferir', [ConversationController::class, 'transfer'])->add(AuthMiddleware::class);
 };

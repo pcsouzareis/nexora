@@ -81,6 +81,8 @@ final class ConversationController
             'can_take' => Permission::allows($user, Permission::CONVERSATION_UPDATE)
                 && (int) ($conversation['cod002'] ?? 0) === 0,
             'is_owner' => (int) ($conversation['cod002'] ?? 0) === (int) $user['cod002'],
+            'filas' => $this->conversations->queues($this->companies->companyCode($user)),
+            'historico_fila' => $this->conversations->queueHistory($this->companies->companyCode($user), (int) $conversation['cod008']),
         ]));
     }
 
@@ -118,8 +120,24 @@ final class ConversationController
         if ($user instanceof ResponseInterface) return $user;
         $conversation = $this->conversation($user, (int) ($args['id'] ?? 0));
         if ($conversation === null || (!$this->canManageConversation($user, $conversation))) return $this->redirect($response, '/conversas');
-        $this->conversations->close($this->companies->companyCode($user), (int) ($args['id'] ?? 0));
-        $this->audit->record($this->companies->companyCode($user), (int) $user['cod002'], 'CLOSE', 'Conversa', (int) ($args['id'] ?? 0), 'Conversa encerrada.', $this->clientIp($request));
+        if ($this->conversations->close($this->companies->companyCode($user), (int) ($args['id'] ?? 0), (int) $user['cod002'])) {
+            $this->audit->record($this->companies->companyCode($user), (int) $user['cod002'], 'CLOSE', 'Conversa', (int) ($args['id'] ?? 0), 'Conversa encerrada.', $this->clientIp($request));
+        }
+        return $this->redirect($response, '/conversas/' . (int) ($args['id'] ?? 0));
+    }
+
+    public function transfer(ServerRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface
+    {
+        $user = $this->manager($response);
+        if ($user instanceof ResponseInterface) return $user;
+        $conversation = $this->conversation($user, (int) ($args['id'] ?? 0));
+        if ($conversation === null || !$this->canManageConversation($user, $conversation)) return $this->redirect($response, '/conversas');
+        $body = (array) $request->getParsedBody();
+        $queueCode = (int) ($body['cod010'] ?? 0);
+        $reason = trim((string) ($body['mot011'] ?? ''));
+        if ($queueCode > 0 && $this->conversations->transfer($this->companies->companyCode($user), (int) $conversation['cod008'], (int) $user['cod002'], $queueCode, mb_substr($reason, 0, 1000))) {
+            $this->audit->record($this->companies->companyCode($user), (int) $user['cod002'], 'UPDATE', 'Conversa', (int) $conversation['cod008'], 'Atendimento transferido para outra fila.', $this->clientIp($request));
+        }
         return $this->redirect($response, '/conversas/' . (int) ($args['id'] ?? 0));
     }
 

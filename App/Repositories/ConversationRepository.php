@@ -138,43 +138,176 @@ final class ConversationRepository
         return (int) $statement->fetchColumn();
     }
 
-    public function take(int $companyCode, int $conversationCode, int $userCode): bool
+    public function queues(int $companyCode): array
     {
         $statement = $this->database->pdo()->prepare(<<<'SQL'
-            UPDATE n008
-            SET cod002 = :userCode,
-                sts008 = 'Em Atendimento'
-            WHERE cod008 = :conversationCode
-              AND cod001 = :companyCode
-              AND (
-                  (cod002 IS NULL AND sts008 IN ('Aberta', 'Aguardando'))
-                  OR (cod002 = :userCode AND sts008 IN ('Aguardando', 'Em Atendimento'))
-              )
+            SELECT cod010, des010, pri010, sla010
+            FROM n010
+            WHERE cod001 = :companyCode
+              AND sts010 = TRUE
+            ORDER BY pri010, des010, cod010
         SQL);
-        $statement->execute([
-            'companyCode' => $companyCode,
-            'conversationCode' => $conversationCode,
-            'userCode' => $userCode,
-        ]);
+        $statement->execute(['companyCode' => $companyCode]);
 
-        return $statement->rowCount() === 1;
+        return $statement->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function close(int $companyCode, int $conversationCode): bool
+    public function queueHistory(int $companyCode, int $conversationCode): array
     {
         $statement = $this->database->pdo()->prepare(<<<'SQL'
-            UPDATE n008
-            SET sts008 = 'Encerrada', fim008 = CURRENT_TIMESTAMP, web008 = NULL
-            WHERE cod008 = :conversationCode
-              AND cod001 = :companyCode
-              AND sts008 IN ('Aberta', 'Aguardando', 'Em Atendimento')
+            SELECT h.cod011, h.mot011, h.sts011, h.enc011, h.ace011,
+                   q.des010 AS fila, u.des002 AS atendente
+            FROM n011 h
+            INNER JOIN n008 c ON c.cod008 = h.cod008
+            INNER JOIN n010 q ON q.cod010 = h.cod010
+            LEFT JOIN n002 u ON u.cod002 = h.cod002
+            WHERE h.cod008 = :conversationCode
+              AND c.cod001 = :companyCode
+            ORDER BY h.enc011 DESC, h.cod011 DESC
         SQL);
         $statement->execute([
             'companyCode' => $companyCode,
             'conversationCode' => $conversationCode,
         ]);
 
-        return $statement->rowCount() === 1;
+        return $statement->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function take(int $companyCode, int $conversationCode, int $userCode): bool
+    {
+        $pdo = $this->database->pdo();
+        $pdo->beginTransaction();
+
+        try {
+            if (!$this->activateHumanHandling($pdo, $companyCode, $conversationCode, $userCode)) {
+                $pdo->rollBack();
+                return false;
+            }
+
+            $pdo->commit();
+            return true;
+        } catch (\Throwable $exception) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+
+            throw $exception;
+        }
+    }
+
+    public function transfer(
+        int $companyCode,
+        int $conversationCode,
+        int $userCode,
+        int $queueCode,
+        string $reason
+    ): bool {
+        $pdo = $this->database->pdo();
+        $pdo->beginTransaction();
+
+        try {
+            $queue = $pdo->prepare('SELECT 1 FROM n010 WHERE cod010 = :queueCode AND cod001 = :companyCode AND sts010 = TRUE');
+            $queue->execute(['queueCode' => $queueCode, 'companyCode' => $companyCode]);
+
+            if ($queue->fetchColumn() === false) {
+                $pdo->rollBack();
+                return false;
+            }
+
+            $conversation = $pdo->prepare(<<<'SQL'
+                UPDATE n008
+                SET cod002 = NULL,
+                    sts008 = 'Aguardando'
+                WHERE cod008 = :conversationCode
+                  AND cod001 = :companyCode
+                  AND sts008 IN ('Aberta', 'Aguardando', 'Em Atendimento')
+            SQL);
+            $conversation->execute(['companyCode' => $companyCode, 'conversationCode' => $conversationCode]);
+
+            if ($conversation->rowCount() !== 1) {
+                $pdo->rollBack();
+                return false;
+            }
+
+            $finish = $pdo->prepare(<<<'SQL'
+                UPDATE n011
+                SET sts011 = 'Transferido'
+                WHERE cod011 = (
+                    SELECT cod011
+                    FROM n011
+                    WHERE cod008 = :conversationCode
+                      AND sts011 IN ('Pendente', 'Aceito')
+                    ORDER BY enc011 DESC, cod011 DESC
+                    LIMIT 1
+                )
+            SQL);
+            $finish->execute(['conversationCode' => $conversationCode]);
+
+            $entry = $pdo->prepare(<<<'SQL'
+                INSERT INTO n011 (cod008, cod010, cod002, mot011, sts011)
+                VALUES (:conversationCode, :queueCode, NULL, :reason, 'Pendente')
+            SQL);
+            $entry->execute([
+                'conversationCode' => $conversationCode,
+                'queueCode' => $queueCode,
+                'reason' => $reason !== '' ? $reason : 'Transferência de atendimento.',
+            ]);
+
+            $pdo->commit();
+            return true;
+        } catch (\Throwable $exception) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+
+            throw $exception;
+        }
+    }
+
+    public function close(int $companyCode, int $conversationCode, int $userCode): bool
+    {
+        $pdo = $this->database->pdo();
+        $pdo->beginTransaction();
+
+        try {
+            $statement = $pdo->prepare(<<<'SQL'
+                UPDATE n008
+                SET sts008 = 'Encerrada', fim008 = CURRENT_TIMESTAMP, web008 = NULL
+                WHERE cod008 = :conversationCode
+                  AND cod001 = :companyCode
+                  AND sts008 IN ('Aberta', 'Aguardando', 'Em Atendimento')
+            SQL);
+            $statement->execute(['companyCode' => $companyCode, 'conversationCode' => $conversationCode]);
+
+            if ($statement->rowCount() !== 1) {
+                $pdo->rollBack();
+                return false;
+            }
+
+            $history = $pdo->prepare(<<<'SQL'
+                UPDATE n011
+                SET sts011 = 'Encerrado'
+                WHERE cod011 = (
+                    SELECT cod011 FROM n011
+                    WHERE cod008 = :conversationCode AND sts011 IN ('Pendente', 'Aceito')
+                    ORDER BY enc011 DESC, cod011 DESC LIMIT 1
+                )
+            SQL);
+            $history->execute(['conversationCode' => $conversationCode]);
+
+            if ($history->rowCount() === 0) {
+                $this->createQueueHistory($pdo, $companyCode, $conversationCode, $userCode, 'Encerrada sem atendimento humano.', 'Encerrado');
+            }
+
+            $pdo->commit();
+            return true;
+        } catch (\Throwable $exception) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+
+            throw $exception;
+        }
     }
 
     public function addHumanMessage(
@@ -187,23 +320,7 @@ final class ConversationRepository
         $pdo->beginTransaction();
 
         try {
-            $conversation = $pdo->prepare(<<<'SQL'
-                UPDATE n008
-                SET cod002 = :userCode, sts008 = 'Em Atendimento'
-                WHERE cod008 = :conversationCode
-                  AND cod001 = :companyCode
-                  AND (
-                      (cod002 IS NULL AND sts008 IN ('Aberta', 'Aguardando'))
-                      OR (cod002 = :userCode AND sts008 IN ('Aguardando', 'Em Atendimento'))
-                  )
-            SQL);
-            $conversation->execute([
-                'companyCode' => $companyCode,
-                'conversationCode' => $conversationCode,
-                'userCode' => $userCode,
-            ]);
-
-            if ($conversation->rowCount() !== 1) {
+            if (!$this->activateHumanHandling($pdo, $companyCode, $conversationCode, $userCode)) {
                 $pdo->rollBack();
                 return null;
             }
@@ -228,5 +345,68 @@ final class ConversationRepository
 
             throw $exception;
         }
+    }
+
+    private function activateHumanHandling(PDO $pdo, int $companyCode, int $conversationCode, int $userCode): bool
+    {
+        $conversation = $pdo->prepare(<<<'SQL'
+            UPDATE n008
+            SET cod002 = :userCode, sts008 = 'Em Atendimento'
+            WHERE cod008 = :conversationCode
+              AND cod001 = :companyCode
+              AND (
+                  (cod002 IS NULL AND sts008 IN ('Aberta', 'Aguardando'))
+                  OR (cod002 = :userCode AND sts008 IN ('Aguardando', 'Em Atendimento'))
+              )
+        SQL);
+        $conversation->execute([
+            'companyCode' => $companyCode,
+            'conversationCode' => $conversationCode,
+            'userCode' => $userCode,
+        ]);
+
+        if ($conversation->rowCount() !== 1) {
+            return false;
+        }
+
+        $accepted = $pdo->prepare(<<<'SQL'
+            UPDATE n011
+            SET cod002 = :userCode,
+                sts011 = 'Aceito',
+                ace011 = COALESCE(ace011, CURRENT_TIMESTAMP)
+            WHERE cod011 = (
+                SELECT cod011 FROM n011
+                WHERE cod008 = :conversationCode AND sts011 = 'Pendente'
+                ORDER BY enc011 DESC, cod011 DESC LIMIT 1
+            )
+        SQL);
+        $accepted->execute(['conversationCode' => $conversationCode, 'userCode' => $userCode]);
+
+        if ($accepted->rowCount() === 0) {
+            $this->createQueueHistory($pdo, $companyCode, $conversationCode, $userCode, 'Atendimento assumido diretamente.', 'Aceito');
+        }
+
+        return true;
+    }
+
+    private function createQueueHistory(PDO $pdo, int $companyCode, int $conversationCode, ?int $userCode, string $reason, string $status): void
+    {
+        $statement = $pdo->prepare(<<<'SQL'
+            INSERT INTO n011 (cod008, cod010, cod002, mot011, sts011, ace011)
+            SELECT :conversationCode, q.cod010, :userCode, :reason, :status, :acceptedAt
+            FROM n010 q
+            WHERE q.cod001 = :companyCode
+              AND q.sts010 = TRUE
+            ORDER BY q.pri010, q.cod010
+            LIMIT 1
+        SQL);
+        $statement->execute([
+            'conversationCode' => $conversationCode,
+            'companyCode' => $companyCode,
+            'userCode' => $userCode,
+            'reason' => $reason,
+            'status' => $status,
+            'acceptedAt' => $status === 'Aceito' ? (new \DateTimeImmutable())->format('Y-m-d H:i:sP') : null,
+        ]);
     }
 }
