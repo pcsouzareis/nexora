@@ -56,7 +56,7 @@ final class LicenseContractPdfGenerator
     /** @param array{name: string, company: string, version: string, accepted_at: string, ip: string} $acceptance */
     private function acceptanceCertificate(array $acceptance): string
     {
-        $value = static fn (string $key): string => htmlspecialchars(
+        $value = static fn(string $key): string => htmlspecialchars(
             $acceptance[$key],
             ENT_QUOTES | ENT_SUBSTITUTE,
             'UTF-8'
