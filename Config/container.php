@@ -28,7 +28,7 @@ return [
 
     Twig::class => function (): Twig {
         $twig = Twig::create(
-            __DIR__ . '/../templates',
+            __DIR__ . '/../App/templates',
             [
                 'cache' => false,
                 'debug' => filter_var(

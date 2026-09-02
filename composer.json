@@ -36,8 +36,8 @@
     "scripts": {
         "test": "phpunit",
         "analyse": "phpstan analyse",
-        "migrate": "@php bin/migrate.php",
-        "migrate:check": "@php bin/migrate.php --dry-run"
+        "migrate": "@php App/bin/migrate.php",
+        "migrate:check": "@php App/bin/migrate.php --dry-run"
     },
     "minimum-stability": "stable",
     "prefer-stable": true

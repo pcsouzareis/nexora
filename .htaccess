@@ -14,7 +14,7 @@ RewriteCond %{THE_REQUEST} \s/+Public/assets(?:/|\s) [NC]
 RewriteRule ^Public/assets(?:/|$) - [F,L]
 
 # Bloqueia acesso direto ao código, configurações e dados internos.
-RewriteRule ^(?:App|Config|Database|Resources|routes|Storage|templates|Tests|vendor|uploads|doc's)(?:/|$) - [F,L,NC]
+RewriteRule ^(?:App|Config|Database|routes|Storage|templates|Tests|vendor|uploads|doc's)(?:/|$) - [F,L,NC]
 RewriteRule ^Public/(?!assets(?:/|$)) - [F,L,NC]
 
 # Bloqueia arquivos sensíveis da raiz.

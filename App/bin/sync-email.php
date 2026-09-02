@@ -8,11 +8,11 @@ use App\Services\EmailSynchronizationService;
 use DI\ContainerBuilder;
 use Dotenv\Dotenv;
 
-require dirname(__DIR__) . '/vendor/autoload.php';
-Dotenv::createImmutable(dirname(__DIR__))->safeLoad();
+require dirname(__DIR__, 2) . '/vendor/autoload.php';
+Dotenv::createImmutable(dirname(__DIR__, 2))->safeLoad();
 
 $builder = new ContainerBuilder();
-$builder->addDefinitions(require dirname(__DIR__) . '/Config/dependencies.php');
+$builder->addDefinitions(require dirname(__DIR__, 2) . '/Config/dependencies.php');
 $container = $builder->build();
 $channels = $container->get(EmailChannelRepository::class);
 $email = $container->get(EmailSynchronizationService::class);

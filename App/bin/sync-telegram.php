@@ -8,12 +8,12 @@ use App\Services\TelegramService;
 use DI\ContainerBuilder;
 use Dotenv\Dotenv;
 
-require dirname(__DIR__) . '/vendor/autoload.php';
+require dirname(__DIR__, 2) . '/vendor/autoload.php';
 
-Dotenv::createImmutable(dirname(__DIR__))->safeLoad();
+Dotenv::createImmutable(dirname(__DIR__, 2))->safeLoad();
 
 $builder = new ContainerBuilder();
-$builder->addDefinitions(require dirname(__DIR__) . '/Config/dependencies.php');
+$builder->addDefinitions(require dirname(__DIR__, 2) . '/Config/dependencies.php');
 $container = $builder->build();
 
 $channels = $container->get(TelegramChannelRepository::class);

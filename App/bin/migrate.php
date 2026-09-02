@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 use Dotenv\Dotenv;
 
-require dirname(__DIR__) . '/vendor/autoload.php';
+require dirname(__DIR__, 2) . '/vendor/autoload.php';
 
-Dotenv::createImmutable(dirname(__DIR__))->safeLoad();
+Dotenv::createImmutable(dirname(__DIR__, 2))->safeLoad();
 
 $pdo = new PDO(
     sprintf(

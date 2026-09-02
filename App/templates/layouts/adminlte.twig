@@ -163,6 +163,9 @@
 					<div class="sidebar-wrapper">
 
 						<nav class="mt-2">
+							{% set cadastro_ativo = rota_atual starts with '/empresas' or rota_atual starts with '/usuarios' or rota_atual starts with '/canais' or rota_atual starts with '/conhecimento' %}
+							{% set administracao_ativa = rota_atual starts with '/integracoes' or rota_atual starts with '/auditoria' or rota_atual starts with '/contratos' %}
+							{% set configuracao_ativa = rota_atual starts with '/minha-senha' or rota_atual starts with '/configuracoes/ia' or rota_atual starts with '/testes/webhook' %}
 
 							<ul
 								class="nav sidebar-menu flex-column" data-lte-toggle="treeview" role="menu">
@@ -171,7 +174,7 @@
 
 								<li class="nav-item">
 
-									<a href="/dashboard" class="nav-link">
+									<a href="/dashboard" class="nav-link {% if rota_atual == '/dashboard' %}active{% endif %}">
 
 										<i class="nav-icon bi bi-speedometer2"></i>
 
@@ -184,7 +187,7 @@
 								</li>
 
 								{% if permissoes_menu.conversations|default(false) %}
-									<li class="nav-item"><a href="/conversas" class="nav-link"><i class="nav-icon bi bi-chat-dots"></i><p>Conversas</p></a></li>
+									<li class="nav-item"><a href="/conversas" class="nav-link {% if rota_atual starts with '/conversas' %}active{% endif %}"><i class="nav-icon bi bi-chat-dots"></i><p>Conversas</p></a></li>
 								{% endif %}
 
 								{% if permissoes_menu.companies|default(false) or permissoes_menu.users|default(false) or permissoes_menu.knowledge|default(false) or permissoes_menu.ai_configuration|default(false) or permissoes_menu.webhook_test|default(false) or permissoes_menu.channels|default(false) or permissoes_menu.integrations|default(false) or permissoes_menu.audit|default(false) or permissoes_menu.contracts|default(false) %}
@@ -192,64 +195,36 @@
 								{% endif %}
 
 								{% if permissoes_menu.companies|default(false) or permissoes_menu.users|default(false) or permissoes_menu.channels|default(false) or permissoes_menu.knowledge|default(false) %}
-									<li class="nav-header">Cadastro</li>
-								{% endif %}
-
-								{% if permissoes_menu.companies|default(false) %}
-									<li class="nav-item"><a href="/empresas" class="nav-link"><i class="nav-icon bi bi-building"></i><p>Empresas</p></a></li>
-								{% endif %}
-
-								{% if permissoes_menu.users|default(false) %}
-									<li class="nav-item"><a href="/usuarios" class="nav-link"><i class="nav-icon bi bi-people"></i><p>Usuários</p></a></li>
-								{% endif %}
-
-								{% if permissoes_menu.knowledge|default(false) %}
-									<li class="nav-item"><a href="/conhecimento" class="nav-link"><i class="nav-icon bi bi-book"></i><p>Aprendizado da IA</p></a></li>
-								{% endif %}
-
-								{% if permissoes_menu.channels|default(false) %}
-									<li class="nav-item"><a href="/canais" class="nav-link"><i class="nav-icon bi bi-broadcast"></i><p>Canais</p></a></li>
+									<li class="nav-item {% if cadastro_ativo %}menu-open{% endif %}">
+										<a href="#" class="nav-link {% if cadastro_ativo %}active{% endif %}"><i class="nav-icon bi bi-folder-plus"></i><p>Cadastro <i class="nav-arrow bi bi-chevron-right"></i></p></a>
+										<ul class="nav nav-treeview">
+											{% if permissoes_menu.companies|default(false) %}<li class="nav-item"><a href="/empresas" class="nav-link {% if rota_atual starts with '/empresas' %}active{% endif %}"><i class="nav-icon bi bi-building"></i><p>Empresas</p></a></li>{% endif %}
+											{% if permissoes_menu.users|default(false) %}<li class="nav-item"><a href="/usuarios" class="nav-link {% if rota_atual starts with '/usuarios' %}active{% endif %}"><i class="nav-icon bi bi-people"></i><p>Usuários</p></a></li>{% endif %}
+											{% if permissoes_menu.channels|default(false) %}<li class="nav-item"><a href="/canais" class="nav-link {% if rota_atual starts with '/canais' %}active{% endif %}"><i class="nav-icon bi bi-broadcast"></i><p>Canais</p></a></li>{% endif %}
+											{% if permissoes_menu.knowledge|default(false) %}<li class="nav-item"><a href="/conhecimento" class="nav-link {% if rota_atual starts with '/conhecimento' %}active{% endif %}"><i class="nav-icon bi bi-book"></i><p>Aprendizado da IA</p></a></li>{% endif %}
+										</ul>
+									</li>
 								{% endif %}
 
 								{% if permissoes_menu.integrations|default(false) or permissoes_menu.audit|default(false) or permissoes_menu.contracts|default(false) %}
-									<li class="nav-header">Administração</li>
+									<li class="nav-item {% if administracao_ativa %}menu-open{% endif %}">
+										<a href="#" class="nav-link {% if administracao_ativa %}active{% endif %}"><i class="nav-icon bi bi-shield-check"></i><p>Administração <i class="nav-arrow bi bi-chevron-right"></i></p></a>
+										<ul class="nav nav-treeview">
+											{% if permissoes_menu.integrations|default(false) %}<li class="nav-item"><a href="/integracoes" class="nav-link {% if rota_atual starts with '/integracoes' %}active{% endif %}"><i class="nav-icon bi bi-plug"></i><p>Integrações</p></a></li>{% endif %}
+											{% if permissoes_menu.audit|default(false) %}<li class="nav-item"><a href="/auditoria" class="nav-link {% if rota_atual starts with '/auditoria' %}active{% endif %}"><i class="nav-icon bi bi-journal-text"></i><p>Auditoria</p></a></li>{% endif %}
+											{% if permissoes_menu.contracts|default(false) %}<li class="nav-item"><a href="/contratos" class="nav-link {% if rota_atual starts with '/contratos' %}active{% endif %}"><i class="nav-icon bi bi-file-earmark-check"></i><p>Controle de Aceite</p></a></li>{% endif %}
+										</ul>
+									</li>
 								{% endif %}
 
-								{% if permissoes_menu.integrations|default(false) %}
-									<li class="nav-item"><a href="/integracoes" class="nav-link"><i class="nav-icon bi bi-plug"></i><p>Integrações</p></a></li>
-								{% endif %}
-
-								{% if permissoes_menu.audit|default(false) %}
-									<li class="nav-item"><a href="/auditoria" class="nav-link"><i class="nav-icon bi bi-journal-text"></i><p>Auditoria</p></a></li>
-								{% endif %}
-
-								{% if permissoes_menu.contracts|default(false) %}
-									<li class="nav-item"><a href="/contratos" class="nav-link"><i class="nav-icon bi bi-file-earmark-check"></i><p>Controle de Aceite</p></a></li>
-								{% endif %}
-
-								<li class="nav-header">Configuração</li>
-
-								<li class="nav-item">
-
-									<a href="/minha-senha" class="nav-link">
-
-										<i class="nav-icon bi bi-key"></i>
-
-										<p>
-											Minha senha
-										</p>
-
-									</a>
-
+								<li class="nav-item {% if configuracao_ativa %}menu-open{% endif %}">
+									<a href="#" class="nav-link {% if configuracao_ativa %}active{% endif %}"><i class="nav-icon bi bi-gear"></i><p>Configuração <i class="nav-arrow bi bi-chevron-right"></i></p></a>
+									<ul class="nav nav-treeview">
+										<li class="nav-item"><a href="/minha-senha" class="nav-link {% if rota_atual starts with '/minha-senha' %}active{% endif %}"><i class="nav-icon bi bi-key"></i><p>Minha senha</p></a></li>
+										{% if permissoes_menu.ai_configuration|default(false) %}<li class="nav-item"><a href="/configuracoes/ia" class="nav-link {% if rota_atual starts with '/configuracoes/ia' %}active{% endif %}"><i class="nav-icon bi bi-stars"></i><p>Configuração da IA</p></a></li>{% endif %}
+										{% if permissoes_menu.webhook_test|default(false) %}<li class="nav-item"><a href="/testes/webhook" class="nav-link {% if rota_atual starts with '/testes/webhook' %}active{% endif %}"><i class="nav-icon bi bi-send-check"></i><p>Teste do Webhook</p></a></li>{% endif %}
+									</ul>
 								</li>
-
-								{% if permissoes_menu.ai_configuration|default(false) %}
-									<li class="nav-item"><a href="/configuracoes/ia" class="nav-link"><i class="nav-icon bi bi-stars"></i><p>Configuração da IA</p></a></li>
-								{% endif %}
-
-								{% if permissoes_menu.webhook_test|default(false) %}
-									<li class="nav-item"><a href="/testes/webhook" class="nav-link"><i class="nav-icon bi bi-send-check"></i><p>Teste do Webhook</p></a></li>
-								{% endif %}
 
 								<!-- Logout -->
 

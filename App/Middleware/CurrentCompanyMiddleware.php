@@ -59,6 +59,7 @@ final class CurrentCompanyMiddleware
         $environment->addGlobal('empresas_disponiveis', $availableCompanies);
         $environment->addGlobal('usuario_atual', $currentUser);
         $environment->addGlobal('permissoes_menu', $menuPermissions);
+        $environment->addGlobal('rota_atual', $request->getUri()->getPath());
         $environment->addGlobal('csrf_token', Session::csrfToken());
 
         return $handler->handle($request);

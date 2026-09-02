@@ -78,7 +78,7 @@ return [
     Twig::class => function (): Twig {
 
         return Twig::create(
-            __DIR__ . '/../templates',
+            __DIR__ . '/../App/templates',
             [
                 'cache' => false,
                 'auto_reload' => true,

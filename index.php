@@ -79,7 +79,7 @@ $app->addBodyParsingMiddleware();
  * ---------------------------------------------------------
  */
 
-$registrarRotas = require __DIR__ . '/routes/web.php';
+$registrarRotas = require __DIR__ . '/App/routes/web.php';
 $registrarRotas($app);
 /*
  * ---------------------------------------------------------
