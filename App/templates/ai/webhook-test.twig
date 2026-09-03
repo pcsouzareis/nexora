@@ -146,5 +146,32 @@
         document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (element) {
             new bootstrap.Tooltip(element);
         });
+
+        const channel = document.getElementById('channel_id');
+        const externalId = document.getElementById('external_id');
+        const name = document.getElementById('name');
+        const conversationId = document.getElementById('conversation_id');
+        const firstNames = ['Ana', 'Beatriz', 'Bruno', 'Carlos', 'Clara', 'Daniel', 'Diego', 'Eduardo', 'Elisa', 'Fabio', 'Fernanda', 'Gabriel', 'Gustavo', 'Helena', 'Isabela', 'Joana', 'Jorge', 'Julia', 'Larissa', 'Laura', 'Leonardo', 'Lucas', 'Luana', 'Marcelo', 'Mariana', 'Marcos', 'Maria', 'Mateus', 'Miguel', 'Nathalia', 'Otavio', 'Patricia', 'Paulo', 'Rafael', 'Raquel', 'Renata', 'Ricardo', 'Roberto', 'Sofia', 'Thiago'];
+        const lastNames = ['Almeida', 'Alves', 'Barbosa', 'Barros', 'Batista', 'Cardoso', 'Carvalho', 'Castro', 'Costa', 'Cunha', 'Dias', 'Duarte', 'Fernandes', 'Ferreira', 'Freitas', 'Garcia', 'Gomes', 'Goncalves', 'Lima', 'Lopes', 'Machado', 'Macedo', 'Martins', 'Melo', 'Mendes', 'Monteiro', 'Moreira', 'Moura', 'Nascimento', 'Nogueira', 'Oliveira', 'Pereira', 'Ramos', 'Ribeiro', 'Rocha', 'Rodrigues', 'Santos', 'Silva', 'Souza', 'Teixeira'];
+
+        function refreshTestData(force) {
+            if (!channel || !externalId || !name || !conversationId || (!force && externalId.value !== '')) {
+                return;
+            }
+
+            const suffix = Date.now().toString(36);
+            const firstName = firstNames[Math.floor(Math.random() * 40)];
+            const lastName = lastNames[Math.floor(Math.random() * 40)];
+            externalId.value = 'teste-canal-' + channel.value + '-' + suffix;
+            name.value = firstName + ' ' + lastName;
+            conversationId.value = 'teste-conversa-' + channel.value + '-' + suffix;
+        }
+
+        if (channel) {
+            channel.addEventListener('change', function () {
+                refreshTestData(true);
+            });
+        }
+        refreshTestData(true);
     </script>
 {% endblock %}

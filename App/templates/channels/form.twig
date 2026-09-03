@@ -1,24 +1,200 @@
 {% extends 'layouts/adminlte.twig' %}
-{% block title %}{{ title }} | {{ app_name }}{% endblock %}
-{% block page_title %}{{ title }}{% endblock %}
-{% block content %}
-<div class="card"><form method="post" action="{{ action }}"><div class="card-body">
-{% if erro %}<div class="alert alert-danger">{{ erro }}</div>{% endif %}
-{% if sucesso %}<div class="alert alert-success">{{ sucesso }}</div>{% endif %}
-<div class="row g-3">
-<div class="col-md-6"><label class="form-label" for="des003">Nome do canal</label><input id="des003" name="des003" class="form-control" maxlength="100" required value="{{ canal.des003|default('') }}"></div>
-<div class="col-md-3"><label class="form-label" for="tip003">Tipo</label><select id="tip003" name="tip003" class="form-select" required title="Selecione o canal de comunicação. Outro serve apenas para cadastro manual, sem integração automática.">{% for type in types %}<option value="{{ type }}" {% if canal.tip003|default('Web') == type %}selected{% endif %}>{{ type == 'Outro' ? 'Outro (sem integração)' : type }}</option>{% endfor %}</select><div class="form-text">“Outro (sem integração)” é apenas um registro manual: não recebe nem envia mensagens automaticamente.</div></div>
-<div class="col-md-3"><label class="form-label" for="cod005">Base padrão</label><select id="cod005" name="cod005" class="form-select"><option value="">Sem base</option>{% for base in bases %}<option value="{{ base.cod005 }}" {% if canal.cod005|default(0) == base.cod005 %}selected{% endif %}>{{ base.des005 }}</option>{% endfor %}</select><div class="form-text">Obrigatória para Webchat, WhatsApp, Facebook e Instagram.</div></div>
-</div>
-<div class="form-check form-switch mt-4"><input id="sts003" type="checkbox" name="sts003" class="form-check-input" value="1" {% if canal.sts003 is not defined or canal.sts003 %}checked{% endif %}><label for="sts003" class="form-check-label">Canal ativo</label></div>
-
-<div id="zapi-settings" class="border rounded p-3 mt-4" {% if canal.tip003|default('Web') != 'WhatsApp' %}style="display:none"{% endif %}><h5>Envio pela Z-API</h5><div class="row g-3"><div class="col-md-4"><label class="form-label">ID da instância</label><input name="ins003" class="form-control" maxlength="120" value="{{ canal.ins003|default('') }}"></div><div class="col-md-4"><label class="form-label">Token da instância</label><input name="tok003" type="password" class="form-control" autocomplete="new-password" placeholder="{{ canal.zapi_configured|default(false) ? 'Token configurado' : 'Informe o token' }}"></div><div class="col-md-4"><label class="form-label">Client-Token</label><input name="cli003" type="password" class="form-control" autocomplete="new-password" placeholder="{{ canal.zapi_configured|default(false) ? 'Client-Token configurado' : 'Informe o Client-Token' }}"></div></div><div class="form-check form-switch mt-3"><input id="out003" type="checkbox" name="out003" class="form-check-input" value="1" {% if canal.out003|default(false) %}checked{% endif %}><label for="out003" class="form-check-label">Enviar respostas humanas automaticamente pela Z-API</label></div></div>
-
-<div id="meta-settings" class="border rounded p-3 mt-4" {% if canal.tip003|default('Web') not in ['Facebook', 'Instagram'] %}style="display:none"{% endif %}><h5>Facebook Messenger</h5><p id="meta-help" class="text-muted small">As credenciais são armazenadas criptografadas e não serão exibidas novamente.</p><div class="row g-3"><div class="col-md-4"><label class="form-label" for="pag003">ID da Página</label><input id="pag003" name="pag003" class="form-control" maxlength="120" value="{{ canal.pag003|default('') }}" placeholder="ID numérico da Página"></div><div class="col-md-4"><label class="form-label" for="met003">Access Token</label><input id="met003" name="met003" type="password" class="form-control" autocomplete="new-password" placeholder="{{ canal.meta_configured|default(false) ? 'Token configurado' : 'Informe o token' }}"></div><div class="col-md-4"><label class="form-label" for="sec003">App Secret</label><input id="sec003" name="sec003" type="password" class="form-control" autocomplete="new-password" placeholder="{{ canal.meta_configured|default(false) ? 'App Secret configurado' : 'Informe o App Secret' }}"></div></div><div class="form-check form-switch mt-3"><input id="outmet003" type="checkbox" name="outmet003" class="form-check-input" value="1" {% if canal.outmet003|default(false) %}checked{% endif %}><label for="outmet003" class="form-check-label">Enviar respostas automaticamente pela Meta</label></div></div>
-
-<div id="email-settings" class="border rounded p-3 mt-4" {% if canal.tip003|default('Web') != 'E-Mail' %}style="display:none"{% endif %}><h5>Conta de e-mail</h5><p class="text-muted small">Use as credenciais da caixa postal. Senhas são criptografadas e não aparecem novamente.</p><div class="row g-3"><div class="col-md-5"><label class="form-label" for="imh003">Servidor IMAP</label><input id="imh003" name="imh003" class="form-control" maxlength="255" value="{{ canal.imh003|default('') }}" placeholder="imap.exemplo.com"></div><div class="col-md-2"><label class="form-label" for="imp003">Porta</label><input id="imp003" name="imp003" type="number" class="form-control" min="1" max="65535" value="{{ canal.imp003|default(993) }}"></div><div class="col-md-2"><label class="form-label" for="ime003">Segurança</label><select id="ime003" name="ime003" class="form-select">{% for option in ['ssl', 'tls', 'none'] %}<option value="{{ option }}" {% if canal.ime003|default('ssl') == option %}selected{% endif %}>{{ option|upper }}</option>{% endfor %}</select></div><div class="col-md-3"><label class="form-label" for="imu003">Usuário IMAP</label><input id="imu003" name="imu003" type="email" class="form-control" value="{{ canal.imu003|default('') }}"></div><div class="col-md-4"><label class="form-label" for="imw003">Senha IMAP</label><input id="imw003" name="imw003" type="password" class="form-control" autocomplete="new-password" placeholder="{{ canal.email_configured|default(false) ? 'Senha configurada' : 'Informe a senha' }}"></div></div><hr><div class="row g-3"><div class="col-md-5"><label class="form-label" for="smh003">Servidor SMTP</label><input id="smh003" name="smh003" class="form-control" maxlength="255" value="{{ canal.smh003|default('') }}" placeholder="smtp.exemplo.com"></div><div class="col-md-2"><label class="form-label" for="smp003">Porta</label><input id="smp003" name="smp003" type="number" class="form-control" min="1" max="65535" value="{{ canal.smp003|default(465) }}"></div><div class="col-md-2"><label class="form-label" for="sme003">Segurança</label><select id="sme003" name="sme003" class="form-select">{% for option in ['ssl', 'tls', 'none'] %}<option value="{{ option }}" {% if canal.sme003|default('ssl') == option %}selected{% endif %}>{{ option|upper }}</option>{% endfor %}</select></div><div class="col-md-3"><label class="form-label" for="smu003">Usuário SMTP</label><input id="smu003" name="smu003" type="email" class="form-control" value="{{ canal.smu003|default('') }}"></div><div class="col-md-4"><label class="form-label" for="smw003">Senha SMTP</label><input id="smw003" name="smw003" type="password" class="form-control" autocomplete="new-password" placeholder="{{ canal.email_configured|default(false) ? 'Senha configurada' : 'Informe a senha' }}"></div></div><div class="form-check form-switch mt-3"><input id="outema003" type="checkbox" name="outema003" class="form-check-input" value="1" {% if canal.outema003|default(false) %}checked{% endif %}><label for="outema003" class="form-check-label">Enviar respostas do Nexora automaticamente pelo SMTP</label></div></div>
-
-<div id="telegram-settings" class="border rounded p-3 mt-4" {% if canal.tip003|default('Web') != 'Telegram' %}style="display:none"{% endif %}><h5>Bot do Telegram</h5><p class="text-muted small">Crie o bot no @BotFather e informe o token. A credencial será armazenada criptografada.</p><div class="row g-3"><div class="col-md-8"><label class="form-label" for="bot003">Token do bot</label><input id="bot003" name="bot003" type="password" class="form-control" autocomplete="new-password" placeholder="{{ canal.telegram_configured|default(false) ? 'Token configurado' : '123456:ABC...' }}"></div></div><div class="form-check form-switch mt-3"><input id="outtel003" type="checkbox" name="outtel003" class="form-check-input" value="1" {% if canal.outtel003|default(false) %}checked{% endif %}><label for="outtel003" class="form-check-label">Enviar respostas automáticas pelo Telegram</label></div><p class="form-text mb-0 mt-2">Salve o canal antes de testar ou sincronizar as mensagens.</p></div>
-</div><div class="card-footer text-end"><a class="btn btn-outline-secondary" href="/canais">Cancelar</a>{% if canal.cod003|default(0) and canal.tip003 == 'E-Mail' %}<button class="btn btn-outline-primary ms-1" formaction="/canais/{{ canal.cod003 }}/testar-email" formmethod="post" title="O teste usa as credenciais já salvas.">Testar conexão</button>{% endif %}{% if canal.cod003|default(0) and canal.tip003 == 'Telegram' %}<button class="btn btn-outline-primary ms-1" formaction="/canais/{{ canal.cod003 }}/testar-telegram" formmethod="post">Testar bot</button><button class="btn btn-outline-success ms-1" formaction="/canais/{{ canal.cod003 }}/sincronizar-telegram" formmethod="post">Sincronizar mensagens</button>{% endif %}<button class="btn btn-primary ms-1">Salvar</button></div></form></div>
+{% block title %}
+	{{ title }}
+	|
+	{{ app_name }}
 {% endblock %}
-{% block scripts %}<script>document.addEventListener('DOMContentLoaded',function(){const type=document.getElementById('tip003'),zapi=document.getElementById('zapi-settings'),meta=document.getElementById('meta-settings'),email=document.getElementById('email-settings'),telegram=document.getElementById('telegram-settings'),pageLabel=meta.querySelector('label[for="pag003"]'),pageInput=document.getElementById('pag003'),help=document.getElementById('meta-help'),refresh=function(){const instagram=type.value==='Instagram',isMeta=['Facebook','Instagram'].includes(type.value);zapi.style.display=type.value==='WhatsApp'?'block':'none';meta.style.display=isMeta?'block':'none';email.style.display=type.value==='E-Mail'?'block':'none';telegram.style.display=type.value==='Telegram'?'block':'none';meta.querySelector('h5').textContent=instagram?'Instagram Direct':'Facebook Messenger';pageLabel.textContent=instagram?'ID da conta profissional do Instagram':'ID da Página';pageInput.placeholder=instagram?'ID da conta profissional do Instagram':'ID numérico da Página';help.textContent=instagram?'Informe o ID da conta profissional, o Access Token com permissão para mensagens e o App Secret do aplicativo Meta. As credenciais são criptografadas.':'As credenciais são armazenadas criptografadas e não serão exibidas novamente.'};type.addEventListener('change',refresh);refresh()});</script>{% endblock %}
+{% block page_title %}
+	{{ title }}
+{% endblock %}
+{% block content %}
+	<div class="card">
+		<form method="post" action="{{ action }}">
+			<div class="card-body">
+				{% if erro %}
+					<div class="alert alert-danger">{{ erro }}</div>
+				{% endif %}
+				{% if sucesso %}
+					<div class="alert alert-success">{{ sucesso }}</div>
+				{% endif %}
+				<div class="row g-3">
+					<div class="col-md-6">
+						<label class="form-label" for="des003">Nome do canal</label><input id="des003" name="des003" class="form-control" maxlength="100" required value="{{ canal.des003|default('') }}"></div>
+					<div class="col-md-3">
+						<label class="form-label" for="tip003">Tipo</label>
+						<select id="tip003" name="tip003" class="form-select" required title="Selecione o canal de comunicação. Outro serve apenas para cadastro manual, sem integração automática.">
+							{% for type in types %}
+								<option value="{{ type }}" {% if canal.tip003|default('Web') == type %} selected {% endif %}>{{ type == 'Outro' ? 'Outro (sem integração)' : type }}</option>
+							{% endfor %}
+						</select>
+						<div class="form-text">“Outro (sem integração)” é apenas um registro manual: não recebe nem envia mensagens automaticamente.</div>
+					</div>
+					<div class="col-md-3">
+						<label class="form-label" for="cod005">Base padrão</label>
+						<select id="cod005" name="cod005" class="form-select">
+							<option value="">Sem base</option>
+							{% for base in bases %}
+								<option value="{{ base.cod005 }}" {% if canal.cod005|default(0) == base.cod005 %} selected {% endif %}>{{ base.des005 }}</option>
+							{% endfor %}
+						</select>
+						<div class="form-text">Obrigatória para Webchat, WhatsApp, Facebook e Instagram.</div>
+					</div>
+				</div>
+				<div class="border rounded p-3 mt-4" id="webhook-test-data">
+					<h5>Dados de teste do webhook</h5>
+					<p class="text-muted small">Os valores são gerados automaticamente ao abrir esta configuração e ao trocar o tipo de canal.</p>
+					<div class="row g-3">
+						<div class="col-md-4">
+							<label class="form-label" for="external_id">external_id</label><input id="external_id" name="external_id" class="form-control" maxlength="120" readonly></div>
+						<div class="col-md-4">
+							<label class="form-label" for="name">Nome do cliente</label><input id="name" name="name" class="form-control" maxlength="150" readonly></div>
+						<div class="col-md-4">
+							<label class="form-label" for="conversation_id">conversation_id</label><input id="conversation_id" name="conversation_id" class="form-control" maxlength="120" readonly></div>
+					</div>
+				</div>
+				<div class="form-check form-switch mt-4"><input id="sts003" type="checkbox" name="sts003" class="form-check-input" value="1" {% if canal.sts003 is not defined or canal.sts003 %} checked {% endif %}><label for="sts003" class="form-check-label">Canal ativo</label>
+				</div>
+
+				<div id="zapi-settings" class="border rounded p-3 mt-4" {% if canal.tip003|default('Web') != 'WhatsApp' %} style="display:none" {% endif %}>
+					<h5>Envio pela Z-API</h5>
+					<div class="row g-3">
+						<div class="col-md-4">
+							<label class="form-label">ID da instância</label><input name="ins003" class="form-control" maxlength="120" value="{{ canal.ins003|default('') }}"></div>
+						<div class="col-md-4">
+							<label class="form-label">Token da instância</label><input name="tok003" type="password" class="form-control" autocomplete="new-password" placeholder="{{ canal.zapi_configured|default(false) ? 'Token configurado' : 'Informe o token' }}"></div>
+						<div class="col-md-4">
+							<label class="form-label">Client-Token</label><input name="cli003" type="password" class="form-control" autocomplete="new-password" placeholder="{{ canal.zapi_configured|default(false) ? 'Client-Token configurado' : 'Informe o Client-Token' }}"></div>
+					</div>
+					<div class="form-check form-switch mt-3"><input id="out003" type="checkbox" name="out003" class="form-check-input" value="1" {% if canal.out003|default(false) %} checked {% endif %}><label for="out003" class="form-check-label">Enviar respostas humanas automaticamente pela Z-API</label>
+					</div>
+				</div>
+
+				<div id="meta-settings" class="border rounded p-3 mt-4" {% if canal.tip003|default('Web') not in ['Facebook', 'Instagram'] %} style="display:none" {% endif %}>
+					<h5>Facebook Messenger</h5>
+					<p id="meta-help" class="text-muted small">As credenciais são armazenadas criptografadas e não serão exibidas novamente.</p>
+					<div class="row g-3">
+						<div class="col-md-4">
+							<label class="form-label" for="pag003">ID da Página</label><input id="pag003" name="pag003" class="form-control" maxlength="120" value="{{ canal.pag003|default('') }}" placeholder="ID numérico da Página"></div>
+						<div class="col-md-4">
+							<label class="form-label" for="met003">Access Token</label><input id="met003" name="met003" type="password" class="form-control" autocomplete="new-password" placeholder="{{ canal.meta_configured|default(false) ? 'Token configurado' : 'Informe o token' }}"></div>
+						<div class="col-md-4">
+							<label class="form-label" for="sec003">App Secret</label><input id="sec003" name="sec003" type="password" class="form-control" autocomplete="new-password" placeholder="{{ canal.meta_configured|default(false) ? 'App Secret configurado' : 'Informe o App Secret' }}"></div>
+					</div>
+					<div class="form-check form-switch mt-3"><input id="outmet003" type="checkbox" name="outmet003" class="form-check-input" value="1" {% if canal.outmet003|default(false) %} checked {% endif %}><label for="outmet003" class="form-check-label">Enviar respostas automaticamente pela Meta</label>
+					</div>
+				</div>
+
+				<div id="email-settings" class="border rounded p-3 mt-4" {% if canal.tip003|default('Web') != 'E-Mail' %} style="display:none" {% endif %}>
+					<h5>Conta de e-mail</h5>
+					<p class="text-muted small">Use as credenciais da caixa postal. Senhas são criptografadas e não aparecem novamente.</p>
+					<div class="row g-3">
+						<div class="col-md-5">
+							<label class="form-label" for="imh003">Servidor IMAP</label><input id="imh003" name="imh003" class="form-control" maxlength="255" value="{{ canal.imh003|default('') }}" placeholder="imap.exemplo.com"></div>
+						<div class="col-md-2">
+							<label class="form-label" for="imp003">Porta</label><input id="imp003" name="imp003" type="number" class="form-control" min="1" max="65535" value="{{ canal.imp003|default(993) }}"></div>
+						<div class="col-md-2">
+							<label class="form-label" for="ime003">Segurança</label>
+							<select id="ime003" name="ime003" class="form-select">
+								{% for option in ['ssl', 'tls', 'none'] %}
+									<option value="{{ option }}" {% if canal.ime003|default('ssl') == option %} selected {% endif %}>{{ option|upper }}</option>
+								{% endfor %}
+							</select>
+						</div>
+						<div class="col-md-3">
+							<label class="form-label" for="imu003">Usuário IMAP</label><input id="imu003" name="imu003" type="email" class="form-control" value="{{ canal.imu003|default('') }}"></div>
+						<div class="col-md-4">
+							<label class="form-label" for="imw003">Senha IMAP</label><input id="imw003" name="imw003" type="password" class="form-control" autocomplete="new-password" placeholder="{{ canal.email_configured|default(false) ? 'Senha configurada' : 'Informe a senha' }}"></div>
+					</div><hr><div class="row g-3">
+						<div class="col-md-5">
+							<label class="form-label" for="smh003">Servidor SMTP</label><input id="smh003" name="smh003" class="form-control" maxlength="255" value="{{ canal.smh003|default('') }}" placeholder="smtp.exemplo.com"></div>
+						<div class="col-md-2">
+							<label class="form-label" for="smp003">Porta</label><input id="smp003" name="smp003" type="number" class="form-control" min="1" max="65535" value="{{ canal.smp003|default(465) }}"></div>
+						<div class="col-md-2">
+							<label class="form-label" for="sme003">Segurança</label>
+							<select id="sme003" name="sme003" class="form-select">
+								{% for option in ['ssl', 'tls', 'none'] %}
+									<option value="{{ option }}" {% if canal.sme003|default('ssl') == option %} selected {% endif %}>{{ option|upper }}</option>
+								{% endfor %}
+							</select>
+						</div>
+						<div class="col-md-3">
+							<label class="form-label" for="smu003">Usuário SMTP</label><input id="smu003" name="smu003" type="email" class="form-control" value="{{ canal.smu003|default('') }}"></div>
+						<div class="col-md-4">
+							<label class="form-label" for="smw003">Senha SMTP</label><input id="smw003" name="smw003" type="password" class="form-control" autocomplete="new-password" placeholder="{{ canal.email_configured|default(false) ? 'Senha configurada' : 'Informe a senha' }}"></div>
+					</div>
+					<div class="form-check form-switch mt-3"><input id="outema003" type="checkbox" name="outema003" class="form-check-input" value="1" {% if canal.outema003|default(false) %} checked {% endif %}><label for="outema003" class="form-check-label">Enviar respostas do Nexora automaticamente pelo SMTP</label>
+					</div>
+				</div>
+
+				<div id="telegram-settings" class="border rounded p-3 mt-4" {% if canal.tip003|default('Web') != 'Telegram' %} style="display:none" {% endif %}>
+					<h5>Bot do Telegram</h5>
+					<p class="text-muted small">Crie o bot no @BotFather e informe o token. A credencial será armazenada criptografada.</p>
+					<div class="row g-3">
+						<div class="col-md-8">
+							<label class="form-label" for="bot003">Token do bot</label><input id="bot003" name="bot003" type="password" class="form-control" autocomplete="new-password" placeholder="{{ canal.telegram_configured|default(false) ? 'Token configurado' : '123456:ABC...' }}"></div>
+					</div>
+					<div class="form-check form-switch mt-3"><input id="outtel003" type="checkbox" name="outtel003" class="form-check-input" value="1" {% if canal.outtel003|default(false) %} checked {% endif %}><label for="outtel003" class="form-check-label">Enviar respostas automáticas pelo Telegram</label>
+					</div>
+					<p class="form-text mb-0 mt-2">Salve o canal antes de testar ou sincronizar as mensagens.</p>
+				</div>
+			</div>
+			<div class="card-footer text-end">
+				<a class="btn btn-outline-secondary" href="/canais">Cancelar</a>
+				{% if canal.cod003|default(0) and canal.tip003 == 'E-Mail' %}
+					<button class="btn btn-outline-primary ms-1" formaction="/canais/{{ canal.cod003 }}/testar-email" formmethod="post" title="O teste usa as credenciais já salvas.">Testar conexão</button>
+				{% endif %}
+				{% if canal.cod003|default(0) and canal.tip003 == 'Telegram' %}
+					<button class="btn btn-outline-primary ms-1" formaction="/canais/{{ canal.cod003 }}/testar-telegram" formmethod="post">Testar bot</button>
+					<button class="btn btn-outline-success ms-1" formaction="/canais/{{ canal.cod003 }}/sincronizar-telegram" formmethod="post">Sincronizar mensagens</button>
+				{% endif %}
+				<button class="btn btn-primary ms-1">Salvar</button>
+			</div>
+		</form>
+	</div>
+{% endblock %}
+{% block scripts %}
+	<script>
+		document.addEventListener('DOMContentLoaded', function () {
+const type = document.getElementById('tip003'),
+zapi = document.getElementById('zapi-settings'),
+meta = document.getElementById('meta-settings'),
+email = document.getElementById('email-settings'),
+telegram = document.getElementById('telegram-settings'),
+pageLabel = meta.querySelector('label[for="pag003"]'),
+pageInput = document.getElementById('pag003'),
+help = document.getElementById('meta-help'),
+externalId = document.getElementById('external_id'),
+name = document.getElementById('name'),
+conversationId = document.getElementById('conversation_id'),
+firstNames = ['Ana', 'Beatriz', 'Bruno', 'Carlos', 'Clara', 'Daniel', 'Diego', 'Eduardo', 'Elisa', 'Fabio', 'Fernanda', 'Gabriel', 'Gustavo', 'Helena', 'Isabela', 'Joana', 'Jorge', 'Julia', 'Larissa', 'Laura', 'Leonardo', 'Lucas', 'Luana', 'Marcelo', 'Mariana', 'Marcos', 'Maria', 'Mateus', 'Miguel', 'Nathalia', 'Otavio', 'Patricia', 'Paulo', 'Rafael', 'Raquel', 'Renata', 'Ricardo', 'Roberto', 'Sofia', 'Thiago'],
+lastNames = ['Almeida', 'Alves', 'Barbosa', 'Barros', 'Batista', 'Cardoso', 'Carvalho', 'Castro', 'Costa', 'Cunha', 'Dias', 'Duarte', 'Fernandes', 'Ferreira', 'Freitas', 'Garcia', 'Gomes', 'Goncalves', 'Lima', 'Lopes', 'Machado', 'Macedo', 'Martins', 'Melo', 'Mendes', 'Monteiro', 'Moreira', 'Moura', 'Nascimento', 'Nogueira', 'Oliveira', 'Pereira', 'Ramos', 'Ribeiro', 'Rocha', 'Rodrigues', 'Santos', 'Silva', 'Souza', 'Teixeira'],
+refreshTestData = function (force) {
+if (force || externalId.value === '') {
+const suffix = Date.now().toString(36);
+const firstName = firstNames[Math.floor(Math.random() * 40)],
+lastName = lastNames[Math.floor(Math.random() * 40)];
+externalId.value = 'teste-' + type.value.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + suffix;
+name.value = firstName + ' ' + lastName;
+conversationId.value = 'teste-conversa-' + suffix
+}
+},
+refresh = function (forceTestData) {
+const instagram = type.value === 'Instagram',
+isMeta = ['Facebook', 'Instagram'].includes(type.value);
+zapi.style.display = type.value === 'WhatsApp' ? 'block' : 'none';
+meta.style.display = isMeta ? 'block' : 'none';
+email.style.display = type.value === 'E-Mail' ? 'block' : 'none';
+telegram.style.display = type.value === 'Telegram' ? 'block' : 'none';
+meta.querySelector('h5').textContent = instagram ? 'Instagram Direct' : 'Facebook Messenger';
+pageLabel.textContent = instagram ? 'ID da conta profissional do Instagram' : 'ID da Página';
+pageInput.placeholder = instagram ? 'ID da conta profissional do Instagram' : 'ID numérico da Página';
+help.textContent = instagram ? 'Informe o ID da conta profissional, o Access Token com permissão para mensagens e o App Secret do aplicativo Meta. As credenciais são criptografadas.' : 'As credenciais são armazenadas criptografadas e não serão exibidas novamente.';
+refreshTestData(forceTestData)
+};
+type.addEventListener('change', function () {
+refresh(true)
+});
+refresh(false)
+});
+	</script>
+{% endblock %}
