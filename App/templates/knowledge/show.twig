@@ -245,6 +245,21 @@
 						<a href="{{ artigo.url006 }}" target="_blank" rel="noopener">Fonte</a>
 					{% endif %}
 					{% if can_manage %}
+						<button class="btn btn-outline-secondary btn-sm mt-2" type="button" data-bs-toggle="collapse" data-bs-target="#editar-artigo-{{ artigo.cod006 }}" aria-expanded="false" aria-controls="editar-artigo-{{ artigo.cod006 }}">
+							<i class="bi bi-pencil me-1"></i>Editar artigo
+						</button>
+						<div class="collapse mt-3" id="editar-artigo-{{ artigo.cod006 }}">
+							<form method="post" action="/conhecimento/{{ base.cod005 }}/artigos/{{ artigo.cod006 }}">
+								<div class="row g-3">
+									<div class="col-md-6"><label class="form-label" for="tit006-{{ artigo.cod006 }}">Título</label><input id="tit006-{{ artigo.cod006 }}" name="tit006" class="form-control" maxlength="200" required value="{{ artigo.tit006 }}"></div>
+									<div class="col-md-3"><label class="form-label" for="vis006-{{ artigo.cod006 }}">Visibilidade</label><select id="vis006-{{ artigo.cod006 }}" name="vis006" class="form-select"><option value="1" {% if artigo.vis006 == 1 %}selected{% endif %}>Público</option><option value="2" {% if artigo.vis006 == 2 %}selected{% endif %}>Interno</option><option value="3" {% if artigo.vis006 == 3 %}selected{% endif %}>Restrito</option></select></div>
+									<div class="col-md-3"><label class="form-label" for="sts006-{{ artigo.cod006 }}">Status</label><select id="sts006-{{ artigo.cod006 }}" name="sts006" class="form-select"><option value="1" {% if artigo.sts006 %}selected{% endif %}>Ativo</option><option value="0" {% if not artigo.sts006 %}selected{% endif %}>Inativo</option></select></div>
+									<div class="col-12"><label class="form-label" for="con006-{{ artigo.cod006 }}">Conteúdo</label><textarea id="con006-{{ artigo.cod006 }}" name="con006" class="form-control" rows="6" maxlength="50000" required>{{ artigo.con006 }}</textarea></div>
+									<div class="col-12"><label class="form-label" for="url006-{{ artigo.cod006 }}">URL da fonte (opcional)</label><input id="url006-{{ artigo.cod006 }}" type="url" name="url006" class="form-control" maxlength="500" value="{{ artigo.url006|default('') }}"></div>
+								</div>
+								<div class="text-end mt-3"><button class="btn btn-primary"><i class="bi bi-check-lg me-1"></i>Salvar artigo</button></div>
+							</form>
+						</div>
 						<form method="post" action="/conhecimento/{{ base.cod005 }}/artigos/{{ artigo.cod006 }}/status" class="mt-2">
 							<div class="input-group input-group-sm" style="max-width: 220px;">
 								<select name="sts006" class="form-select">

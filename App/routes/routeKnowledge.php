@@ -20,6 +20,10 @@ return static function (App $app): void {
         [KnowledgeController::class, 'updateArticleStatus']
     )->add(AuthMiddleware::class);
     $app->post(
+        '/conhecimento/{id:[0-9]+}/artigos/{article:[0-9]+}',
+        [KnowledgeController::class, 'updateArticle']
+    )->add(AuthMiddleware::class);
+    $app->post(
         '/conhecimento/{id:[0-9]+}/configuracao-ia',
         [KnowledgeController::class, 'updateBaseAiConfiguration']
     )->add(AuthMiddleware::class);

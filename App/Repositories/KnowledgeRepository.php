@@ -201,4 +201,29 @@ public function updateBaseAiConfiguration(
             'baseCode' => $baseCode,
         ]);
     }
+
+    public function updateArticle(int $baseCode, int $articleCode, array $data): void
+    {
+        $statement = $this->database->pdo()->prepare(<<<'SQL'
+            UPDATE n006
+            SET tit006 = :title,
+                con006 = :content,
+                url006 = :url,
+                vis006 = :visibility,
+                sts006 = :active,
+                atu006 = CURRENT_TIMESTAMP
+            WHERE cod006 = :articleCode
+              AND cod005 = :baseCode
+        SQL);
+
+        $statement->execute([
+            'title' => $data['title'],
+            'content' => $data['content'],
+            'url' => $data['url'] ?: null,
+            'visibility' => $data['visibility'],
+            'active' => $data['active'] ? 'true' : 'false',
+            'articleCode' => $articleCode,
+            'baseCode' => $baseCode,
+        ]);
+    }
 }

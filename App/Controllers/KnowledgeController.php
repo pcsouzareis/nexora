@@ -264,6 +264,57 @@ public function updateBaseAiConfiguration(
         );
     }
 
+    public function updateArticle(
+        ServerRequestInterface $request,
+        ResponseInterface $response,
+        array $args
+    ): ResponseInterface {
+        $user = $this->user($response);
+
+        if ($user instanceof ResponseInterface) {
+            return $user;
+        }
+
+        if (!Permission::allows($user, Permission::KNOWLEDGE_UPDATE)) {
+            return $this->redirect($response, '/dashboard');
+        }
+
+        $base = $this->knowledge->findBase(
+            $this->companies->companyCode($user),
+            (int) ($args['id'] ?? 0)
+        );
+
+        if ($base === null) {
+            return $this->redirect($response, '/conhecimento');
+        }
+
+        $body = (array) $request->getParsedBody();
+        $data = [
+            'title' => trim((string) ($body['tit006'] ?? '')),
+            'content' => trim((string) ($body['con006'] ?? '')),
+            'url' => trim((string) ($body['url006'] ?? '')),
+            'visibility' => (int) ($body['vis006'] ?? 2),
+            'active' => (int) ($body['sts006'] ?? 0) === 1,
+        ];
+
+        if (
+            $data['title'] === '' || strlen($data['title']) > 200 ||
+            $data['content'] === '' || strlen($data['content']) > 50000 ||
+            strlen($data['url']) > 500 ||
+            !in_array($data['visibility'], [1, 2, 3], true)
+        ) {
+            return $this->redirect($response, '/conhecimento/' . $base['cod005']);
+        }
+
+        $this->knowledge->updateArticle(
+            (int) $base['cod005'],
+            (int) ($args['article'] ?? 0),
+            $data
+        );
+
+        return $this->redirect($response, '/conhecimento/' . $base['cod005']);
+    }
+
     private function user(ResponseInterface $response): array|ResponseInterface
     {
         $session = Session::user();
