@@ -15,6 +15,13 @@ final class MetaMessengerService {
   if(!$channel['outmet003']||empty($channel['pag003'])||empty($channel['met003'])||trim($message)==='')return false;
   try {
    $token=$this->encryption->decrypt($channel['met003']);
+    if(($channel['tip003']??'')==='WhatsApp Cloud') {
+     $response=(new Client(['timeout'=>20,'http_errors'=>false]))->post('https://graph.facebook.com/v22.0/'.rawurlencode((string)$channel['pag003']).'/messages',[
+      'headers'=>['Authorization'=>'Bearer '.$token],
+      'json'=>['messaging_product'=>'whatsapp','to'=>$recipient,'type'=>'text','text'=>['body'=>$message]],
+     ]);
+     return $response->getStatusCode()>=200&&$response->getStatusCode()<300;
+    }
    $isInstagram=($channel['tip003']??'')==='Instagram';
    $url=$isInstagram
     ? 'https://graph.instagram.com/v22.0/'.$channel['pag003'].'/messages'

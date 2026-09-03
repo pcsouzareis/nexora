@@ -30,7 +30,7 @@
 						<label class="form-label" for="tip003">Tipo</label>
 						<select id="tip003" name="tip003" class="form-select" required title="Selecione o canal de comunicação. Outro serve apenas para cadastro manual, sem integração automática.">
 							{% for type in types %}
-								<option value="{{ type }}" {% if canal.tip003|default('Web') == type %} selected {% endif %}>{{ type == 'Outro' ? 'Outro (sem integração)' : type }}</option>
+								   <option value="{{ type }}" {% if canal.tip003|default('Web') == type %} selected {% endif %}>{{ type == 'Outro' ? 'Outro (sem integração)' : type }}</option>
 							{% endfor %}
 						</select>
 						<div class="form-text">“Outro (sem integração)” é apenas um registro manual: não recebe nem envia mensagens automaticamente.</div>
@@ -43,7 +43,7 @@
 								<option value="{{ base.cod005 }}" {% if canal.cod005|default(0) == base.cod005 %} selected {% endif %}>{{ base.des005 }}</option>
 							{% endfor %}
 						</select>
-						<div class="form-text">Obrigatória para Webchat, WhatsApp, Facebook e Instagram.</div>
+						   <div class="form-text">Obrigatória para Webchat, WhatsApp, WhatsApp Cloud, Facebook e Instagram.</div>
 					</div>
 				</div>
 				<div class="form-check form-switch mt-4"><input id="sts003" type="checkbox" name="sts003" class="form-check-input" value="1" {% if canal.sts003 is not defined or canal.sts003 %} checked {% endif %}><label for="sts003" class="form-check-label">Canal ativo</label>
@@ -63,8 +63,8 @@
 					</div>
 				</div>
 
-				<div id="meta-settings" class="border rounded p-3 mt-4" {% if canal.tip003|default('Web') not in ['Facebook', 'Instagram'] %} style="display:none" {% endif %}>
-					<h5>Facebook Messenger</h5>
+				<div id="meta-settings" class="border rounded p-3 mt-4" {% if canal.tip003|default('Web') not in ['Facebook', 'Instagram', 'WhatsApp Cloud'] %} style="display:none" {% endif %}>
+							<h5>Facebook Messenger</h5>
 					<p id="meta-help" class="text-muted small">As credenciais são armazenadas criptografadas e não serão exibidas novamente.</p>
 					<div class="row g-3">
 						<div class="col-md-4">
@@ -172,15 +172,16 @@ pageInput = document.getElementById('pag003'),
 help = document.getElementById('meta-help'),
 refresh = function () {
 const instagram = type.value === 'Instagram',
-isMeta = ['Facebook', 'Instagram'].includes(type.value);
+cloud = type.value === 'WhatsApp Cloud',
+isMeta = ['Facebook', 'Instagram', 'WhatsApp Cloud'].includes(type.value);
 zapi.style.display = type.value === 'WhatsApp' ? 'block' : 'none';
 meta.style.display = isMeta ? 'block' : 'none';
 email.style.display = type.value === 'E-Mail' ? 'block' : 'none';
 telegram.style.display = type.value === 'Telegram' ? 'block' : 'none';
-meta.querySelector('h5').textContent = instagram ? 'Instagram Direct' : 'Facebook Messenger';
-pageLabel.textContent = instagram ? 'ID da conta profissional do Instagram' : 'ID da Página';
-pageInput.placeholder = instagram ? 'ID da conta profissional do Instagram' : 'ID numérico da Página';
-help.textContent = instagram ? 'Informe o ID da conta profissional, o Access Token com permissão para mensagens e o App Secret do aplicativo Meta. As credenciais são criptografadas.' : 'As credenciais são armazenadas criptografadas e não serão exibidas novamente.';
+meta.querySelector('h5').textContent = cloud ? 'WhatsApp Cloud API' : (instagram ? 'Instagram Direct' : 'Facebook Messenger');
+pageLabel.textContent = cloud ? 'Phone Number ID' : (instagram ? 'ID da conta profissional do Instagram' : 'ID da Página');
+pageInput.placeholder = cloud ? 'ID do número de telefone no WhatsApp Manager' : (instagram ? 'ID da conta profissional do Instagram' : 'ID numérico da Página');
+help.textContent = cloud ? 'Informe o Phone Number ID, o token permanente e o App Secret do aplicativo Meta. As credenciais são criptografadas.' : (instagram ? 'Informe o ID da conta profissional, o Access Token com permissão para mensagens e o App Secret do aplicativo Meta. As credenciais são criptografadas.' : 'As credenciais são armazenadas criptografadas e não serão exibidas novamente.');
 };
 type.addEventListener('change', function () {
 refresh()

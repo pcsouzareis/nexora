@@ -34,6 +34,7 @@ return static function (App $app): void {
             )->setName('api.webhooks.receive');
 
             $group->post('/zapi/{token:[a-f0-9]{40}}/receber', [ZApiWebhookController::class, 'receive']);
+            $group->post('/zapi/{token:[a-f0-9]{40}}/recebe', [ZApiWebhookController::class, 'receive']);
             $group->post('/zapi/{token:[a-f0-9]{40}}/entrega', [ZApiWebhookController::class, 'delivery']);
             $group->post('/zapi/{token:[a-f0-9]{40}}/status', [ZApiWebhookController::class, 'status']);
             $group->get('/meta/{token:[a-f0-9]{40}}', [MetaWebhookController::class, 'verify']);

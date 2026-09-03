@@ -6,8 +6,10 @@
 {% if webhook_secret %}<div class="alert alert-warning"><strong>Guarde esta chave agora:</strong><br><code>{{ webhook_secret }}</code><br><small>Ela não será exibida novamente.</small></div>{% endif %}
 {% if canal.tip003 == 'Web' and canal.pub003 %}<div class="card"><div class="card-header"><strong>Webchat</strong></div><div class="card-body"><label class="form-label">Caminho público <i class="bi bi-question-circle ms-1 text-muted" tabindex="0" data-bs-toggle="tooltip" title="Endereço que pode ser aberto diretamente ou usado em um iframe no site da empresa. O token não é uma chave da IA."></i></label><input class="form-control" readonly value="{{ app_url|default('')|trim('/') }}/chat/{{ canal.pub003 }}"><p class="text-muted mt-2 mb-0">Vinculado à base: {{ canal.base|default('Não definida') }}.</p></div>{% if can_update %}<div class="card-footer"><form method="post" action="/canais/{{ canal.cod003 }}/novo-token-webchat"><button class="btn btn-outline-warning btn-sm" data-bs-toggle="tooltip" title="Invalida o endereço público atual. Atualize o iframe no site após gerar um novo token.">Gerar novo token público</button></form></div>{% endif %}</div>{% endif %}
 {% if canal.tip003 == 'WhatsApp' %}<div class="card"><div class="card-header"><strong>Z-API</strong></div><div class="card-body"><p class="mb-1">Instância: {{ canal.ins003|default('Não configurada') }}</p><p class="mb-0">Envio humano: {{ canal.out003 and canal.zapi_configured ? 'ativo' : 'não configurado ou inativo' }}</p></div></div>{% endif %}
+{% if canal.tip003 == 'WhatsApp Cloud' %}<div class="card"><div class="card-header"><strong>WhatsApp Cloud API</strong></div><div class="card-body"><p class="mb-1">Phone Number ID: {{ canal.pag003|default('Não configurado') }}</p><p class="mb-0">Envio automático: {{ canal.outmet003 and canal.meta_configured ? 'ativo' : 'não configurado ou inativo' }}</p></div></div>{% endif %}
 {% if canal.tip003 == 'E-Mail' %}<div class="card"><div class="card-header"><strong>Conta de e-mail</strong></div><div class="card-body"><p class="mb-1">IMAP: {{ canal.imh003|default('Não configurado') }}{% if canal.imp003 %}:{{ canal.imp003 }}{% endif %}</p><p class="mb-1">SMTP: {{ canal.smh003|default('Não configurado') }}{% if canal.smp003 %}:{{ canal.smp003 }}{% endif %}</p><p class="mb-0">Envio automático: {{ canal.outema003 and canal.email_configured ? 'ativo' : 'não configurado ou inativo' }}</p></div></div>{% endif %}
 {% if canal.tip003 == 'Telegram' %}<div class="card"><div class="card-header"><strong>Bot do Telegram</strong></div><div class="card-body"><p class="mb-1">Credencial: {{ canal.telegram_configured ? 'configurada' : 'não configurada' }}</p><p class="mb-0">Respostas automáticas: {{ canal.outtel003 and canal.telegram_configured ? 'ativas' : 'inativas' }}</p></div></div>{% endif %}
+{% if canal.tip003 == 'WhatsApp Cloud' and canal.pub003 %}<div class="card"><div class="card-header"><strong>Webhook WhatsApp Cloud</strong></div><div class="card-body"><p class="mb-2">Callback URL:</p><code class="text-break">{{ app_url|default('')|trim('/') }}/api/meta/{{ canal.pub003 }}</code><p class="mt-3 mb-0">Use o mesmo token do final da URL como Verify Token no Meta Developers.</p></div></div>{% endif %}
 {% if canal.tip003 == 'WhatsApp' and canal.pub003 %}
 <div class="card">
     <div class="card-header"><strong><i class="bi bi-link-45deg me-1"></i>Webhooks Z-API</strong></div>
@@ -17,19 +19,19 @@
             <div class="col-md-4 d-flex">
                 <div class="card card-outline card-primary h-100 w-100 mb-0">
                     <div class="card-header"><strong><i class="bi bi-chat-dots me-1"></i>Recebimento</strong></div>
-                    <div class="card-body"><code class="text-break">/api/zapi/{{ canal.pub003 }}/receber</code></div>
+                    <div class="card-body"><code class="text-break">{{ app_url|default('')|trim('/') }}/api/zapi/{{ canal.pub003 }}/receber</code></div>
                 </div>
             </div>
             <div class="col-md-4 d-flex">
                 <div class="card card-outline card-success h-100 w-100 mb-0">
                     <div class="card-header"><strong><i class="bi bi-check2-circle me-1"></i>Entrega</strong></div>
-                    <div class="card-body"><code class="text-break">/api/zapi/{{ canal.pub003 }}/entrega</code></div>
+                    <div class="card-body"><code class="text-break">{{ app_url|default('')|trim('/') }}/api/zapi/{{ canal.pub003 }}/entrega</code></div>
                 </div>
             </div>
             <div class="col-md-4 d-flex">
                 <div class="card card-outline card-secondary h-100 w-100 mb-0">
                     <div class="card-header"><strong><i class="bi bi-activity me-1"></i>Status</strong></div>
-                    <div class="card-body"><code class="text-break">/api/zapi/{{ canal.pub003 }}/status</code></div>
+                    <div class="card-body"><code class="text-break">{{ app_url|default('')|trim('/') }}/api/zapi/{{ canal.pub003 }}/status</code></div>
                 </div>
             </div>
         </div>

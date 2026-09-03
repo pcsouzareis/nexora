@@ -23,7 +23,7 @@ use Slim\Views\Twig;
 
 final class ChannelController
 {
-    private const TYPES = ['WhatsApp', 'Web', 'Instagram', 'Facebook', 'E-Mail', 'Telegram', 'Outro'];
+    private const TYPES = ['WhatsApp', 'WhatsApp Cloud', 'Web', 'Instagram', 'Facebook', 'E-Mail', 'Telegram', 'Outro'];
 
     public function __construct(private readonly Twig $view, private readonly UserRepository $users, private readonly ChannelRepository $channels, private readonly CurrentCompanyContext $companies, private readonly AuditRepository $audit, private readonly Encryption $encryption, private readonly MetaChannelRepository $meta, private readonly EmailChannelRepository $email, private readonly EmailConnectionTester $emailTester, private readonly TelegramChannelRepository $telegram, private readonly TelegramService $telegramService) {}
 
@@ -48,12 +48,13 @@ final class ChannelController
         $data = $this->data((array) $request->getParsedBody());
         if ($data === null || !$this->channels->baseBelongsToCompany($this->companies->companyCode($user), $data['base_code'])) return $this->form($response, $user, (array) $request->getParsedBody(), '/canais', 'Novo canal', 'Dados inválidos.');
         if ($data['type'] === 'WhatsApp' && $data['zapi_enabled'] && ($data['zapi_instance'] === '' || $data['zapi_token'] === '' || $data['zapi_client_token'] === '')) return $this->form($response, $user, (array) $request->getParsedBody(), '/canais', 'Novo canal', 'Informe ID da instância, Token e Client-Token da Z-API para habilitar o envio.');
+        if ($data['type'] === 'WhatsApp Cloud' && $data['meta_enabled'] && ($data['meta_page'] === '' || $data['meta_token'] === '' || $data['meta_secret'] === '')) return $this->form($response, $user, (array) $request->getParsedBody(), '/canais', 'Novo canal', 'Informe o Phone Number ID, Access Token e App Secret da WhatsApp Cloud API para habilitar o envio.');
         if ($data['type'] === 'Telegram' && $data['telegram_token_encrypted'] === null) return $this->form($response, $user, (array) $request->getParsedBody(), '/canais', 'Novo canal', 'Informe o token do bot Telegram.');
         $data['zapi_token_encrypted'] = $data['type'] === 'WhatsApp' && $data['zapi_token'] !== '' ? $this->encryption->encrypt($data['zapi_token']) : null;
         $data['zapi_client_token_encrypted'] = $data['type'] === 'WhatsApp' && $data['zapi_client_token'] !== '' ? $this->encryption->encrypt($data['zapi_client_token']) : null;
         $secret = 'nexora_' . bin2hex(random_bytes(24));
-        $code = $this->channels->create($this->companies->companyCode($user), $data, password_hash($secret, PASSWORD_DEFAULT), in_array($data['type'], ['Web', 'WhatsApp', 'Facebook', 'Instagram'], true) ? bin2hex(random_bytes(20)) : null);
-        if (in_array($data['type'], ['Facebook', 'Instagram'], true)) $this->meta->save($this->companies->companyCode($user), $code, $data['meta_page'], $data['meta_token'] === '' ? null : $this->encryption->encrypt($data['meta_token']), $data['meta_secret'] === '' ? null : $this->encryption->encrypt($data['meta_secret']), $data['meta_enabled']);
+        $code = $this->channels->create($this->companies->companyCode($user), $data, password_hash($secret, PASSWORD_DEFAULT), in_array($data['type'], ['Web', 'WhatsApp', 'WhatsApp Cloud', 'Facebook', 'Instagram'], true) ? bin2hex(random_bytes(20)) : null);
+        if (in_array($data['type'], ['Facebook', 'Instagram', 'WhatsApp Cloud'], true)) $this->meta->save($this->companies->companyCode($user), $code, $data['meta_page'], $data['meta_token'] === '' ? null : $this->encryption->encrypt($data['meta_token']), $data['meta_secret'] === '' ? null : $this->encryption->encrypt($data['meta_secret']), $data['meta_enabled']);
         if ($data['type'] === 'E-Mail') $this->email->save($this->companies->companyCode($user), $code, $data);
         if ($data['type'] === 'Telegram') $this->telegram->save($this->companies->companyCode($user), $code, $data['telegram_token_encrypted'], $data['telegram_enabled']);
         $this->audit->record($this->companies->companyCode($user), (int) $user['cod002'], 'CREATE', 'Canal', $code, 'Canal criado: ' . $data['description'] . '.', $this->clientIp($request));
@@ -92,7 +93,7 @@ final class ChannelController
                 $data['zapi_enabled']
             );
         }
-        if (in_array($data['type'], ['Facebook', 'Instagram'], true)) {
+        if (in_array($data['type'], ['Facebook', 'Instagram', 'WhatsApp Cloud'], true)) {
             $this->channels->ensureFacebookWebhookToken($this->companies->companyCode($user), $code, bin2hex(random_bytes(20)));
             $this->meta->save($this->companies->companyCode($user), $code, $data['meta_page'], $data['meta_token'] === '' ? null : $this->encryption->encrypt($data['meta_token']), $data['meta_secret'] === '' ? null : $this->encryption->encrypt($data['meta_secret']), $data['meta_enabled']);
         }
@@ -153,7 +154,7 @@ final class ChannelController
     {
         $type = trim((string) ($body['tip003'] ?? '')); $description = trim((string) ($body['des003'] ?? ''));
         $base = (int) ($body['cod005'] ?? 0); $baseCode = $base > 0 ? $base : null;
-        if ($description === '' || strlen($description) > 100 || !in_array($type, self::TYPES, true) || (in_array($type, ['Web', 'WhatsApp', 'Facebook', 'Instagram', 'Telegram'], true) && $baseCode === null)) return null;
+        if ($description === '' || strlen($description) > 100 || !in_array($type, self::TYPES, true) || (in_array($type, ['Web', 'WhatsApp', 'WhatsApp Cloud', 'Facebook', 'Instagram', 'Telegram'], true) && $baseCode === null)) return null;
         $instance = trim((string) ($body['ins003'] ?? ''));
         if ($type === 'WhatsApp' && strlen($instance) > 120) return null;
         $imapHost = trim((string) ($body['imh003'] ?? '')); $smtpHost = trim((string) ($body['smh003'] ?? ''));

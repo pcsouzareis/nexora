@@ -23,16 +23,34 @@ final class ZApiWebhookController
 
     public function receive(ServerRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface
     {
-        $channel = $this->channel((string) ($args['token'] ?? ''));
-        $body = $request->getParsedBody();
-        if ($channel === null) return $this->json($response, ['error' => 'Canal não encontrado.'], 404);
-        if (!is_array($body)) return $this->json($response, ['error' => 'JSON inválido.'], 422);
+        $token = (string) ($args['token'] ?? '');
+        $channel = $this->channel($token);
+        $body = $this->body($request);
+        $this->log('Webhook Z-API de recebimento recebido.', [
+            'token_valid' => $channel !== null,
+            'body_keys' => is_array($body) ? array_keys($body) : [],
+            'content_type' => $request->getHeaderLine('Content-Type'),
+        ]);
+        if ($channel === null) {
+            $this->log('Webhook Z-API rejeitado: canal não encontrado ou token inválido.');
+            return $this->json($response, ['error' => 'Canal não encontrado.'], 404);
+        }
+        if (!is_array($body)) {
+            $this->log('Webhook Z-API rejeitado: JSON inválido.');
+            return $this->json($response, ['error' => 'JSON inválido.'], 422);
+        }
         if (($body['fromMe'] ?? false) || ($body['isStatusReply'] ?? false) || ($body['isGroup'] ?? false) || ($body['isNewsletter'] ?? false)) return $this->json($response, ['received' => true, 'ignored' => true]);
 
         $message = trim((string) (($body['text']['message'] ?? '')));
-        $phone = trim((string) ($body['senderLid'] ?? '')) ?: trim((string) ($body['phone'] ?? ''));
+        $phone = trim((string) ($body['phone'] ?? '')) ?: trim((string) ($body['senderLid'] ?? ''));
         $messageId = trim((string) ($body['messageId'] ?? ''));
-        if ($message === '' || $phone === '' || $messageId === '' || (int) ($channel['cod005'] ?? 0) <= 0) return $this->json($response, ['error' => 'Evento sem texto, identificador ou base padrão.'], 422);
+        if ($message === '' || $phone === '' || $messageId === '' || (int) ($channel['cod005'] ?? 0) <= 0) {
+            $this->log('Webhook Z-API rejeitado: campos obrigatórios ausentes.', [
+                'has_message' => $message !== '', 'has_phone' => $phone !== '',
+                'has_message_id' => $messageId !== '', 'has_base' => (int) ($channel['cod005'] ?? 0) > 0,
+            ]);
+            return $this->json($response, ['error' => 'Evento sem texto, identificador ou base padrão.'], 422);
+        }
 
         try {
             $result = $this->processor->process((int) $channel['cod001'], (int) $channel['cod003'], [
@@ -48,6 +66,22 @@ final class ZApiWebhookController
             $this->outbound->deliverMessage((int) $channel['cod001'], (int) $result['body']['conversation_id'], (int) $reply['message_id'], (string) $reply['message']);
         }
         return $this->json($response, $result['body'], $result['status']);
+    }
+
+    private function body(ServerRequestInterface $request): mixed
+    {
+        $body = $request->getParsedBody();
+        if (is_array($body)) return $body;
+
+        $raw = trim((string) $request->getBody());
+        if ($raw === '') return null;
+        $decoded = json_decode($raw, true);
+        return is_array($decoded) ? $decoded : null;
+    }
+
+    private function log(string $message, array $context = []): void
+    {
+        error_log($message . ($context === [] ? '' : ' ' . (string) json_encode($context, JSON_UNESCAPED_UNICODE)));
     }
 
     public function delivery(ServerRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface

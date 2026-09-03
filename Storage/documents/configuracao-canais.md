@@ -6,7 +6,7 @@ Este documento descreve os canais disponíveis no Nexora e como configurá-los. 
 
 1. Informe um nome que identifique claramente o canal, por exemplo `WhatsApp Comercial`.
 2. Mantenha o canal ativo somente depois de concluir os testes.
-3. Para Webchat, WhatsApp, Facebook, Instagram e Telegram, selecione uma **base de aprendizado ativa**. Ela define o conhecimento usado pela IA naquele canal.
+3. Para Webchat, WhatsApp, WhatsApp Cloud, Facebook, Instagram e Telegram, selecione uma **base de aprendizado ativa**. Ela define o conhecimento usado pela IA naquele canal.
 4. Credenciais informadas na tela são armazenadas criptografadas e não são exibidas novamente. Ao trocar uma senha ou token, informe o novo valor e salve.
 5. Nunca publique tokens, Client-Token, App Secret, chaves de webhook ou senhas em páginas, repositórios ou mensagens.
 
@@ -108,7 +108,49 @@ Assine os eventos de mensagens da Página no aplicativo Meta. Utilize uma Págin
 
 ---
 
-## 4. Instagram Direct
+## 4. WhatsApp Cloud API
+
+Use o tipo **WhatsApp Cloud** para conectar um número do WhatsApp Business diretamente à plataforma Meta, sem a Z-API.
+
+### Cadastro
+
+- **Base padrão:** obrigatória.
+- **Phone Number ID:** identificador do número no WhatsApp Manager, não é o número de telefone.
+- **Access Token:** token permanente do sistema com permissões de WhatsApp Business.
+- **App Secret:** segredo do aplicativo Meta, usado para validar a assinatura do webhook.
+- **Enviar respostas automaticamente pela Meta:** habilita as respostas da IA pela Cloud API.
+
+### Webhook
+
+Na configuração do aplicativo Meta, use o endereço exibido no canal:
+
+```text
+https://seu-dominio/api/meta/{token-do-canal}
+```
+
+Use o mesmo `{token-do-canal}` como Verify Token e assine o campo `messages` do produto WhatsApp. O servidor precisa estar publicado em HTTPS. O Nexora valida `X-Hub-Signature-256`, recebe mensagens de texto e responde pelo endpoint Graph API do Phone Number ID.
+
+### Configuração no Meta Developers
+
+1. Crie ou selecione um aplicativo do tipo **Business** no Meta Developers.
+2. Adicione o produto **WhatsApp** e vincule o número de telefone do WhatsApp Business.
+3. No produto WhatsApp, abra a configuração de webhooks e informe a **Callback URL** e o **Verify Token** exibidos no canal do Nexora.
+4. Conclua a verificação e assine o campo `messages` para a conta do WhatsApp Business.
+5. Gere um token permanente de sistema com as permissões `whatsapp_business_management` e `whatsapp_business_messaging`.
+6. Cadastre no Nexora o **Phone Number ID**, o token permanente e o **App Secret** do aplicativo.
+
+O endereço Cloud usa apenas `/api/meta/{token-do-canal}`. Não configure `/api/zapi/.../receber`, `/entrega` ou `/status` para este tipo de canal. A Cloud API não usa Instance ID, Token da Z-API ou Client-Token.
+
+### Mensagens e limitações
+
+- O Nexora processa mensagens de texto recebidas pelo evento `messages`.
+- Eventos de status, mídia e mensagens sem texto são reconhecidos pelo webhook, mas não geram processamento de texto.
+- Para iniciar uma conversa fora da janela de atendimento da Meta, use um template aprovado pela Meta; respostas livres são destinadas às conversas dentro da janela permitida.
+- O envio automático depende de **Enviar respostas automaticamente pela Meta** estar habilitado no canal.
+
+---
+
+## 5. Instagram Direct
 
 Use o tipo **Instagram** para mensagens diretas da conta profissional conectada ao ecossistema Meta.
 
@@ -132,7 +174,7 @@ Cadastre a URL no aplicativo Meta, utilize o mesmo token como Verify Token e ass
 
 ---
 
-## 5. Telegram
+## 6. Telegram
 
 O tipo **Telegram** usa o bot criado no [@BotFather](https://t.me/BotFather). O Nexora recebe atualizações por sincronização (polling), e não por uma URL de webhook do Telegram.
 
@@ -156,7 +198,7 @@ Ajuste o caminho do PHP e da instalação conforme a hospedagem. O processo poss
 
 ---
 
-## 6. E-mail (IMAP e SMTP)
+## 7. E-mail (IMAP e SMTP)
 
 Use o tipo **E-Mail** para ler mensagens não lidas de uma caixa postal e, quando habilitado, responder via SMTP.
 
