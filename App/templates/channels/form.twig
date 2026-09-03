@@ -9,6 +9,12 @@
 {% endblock %}
 {% block content %}
 	<div class="card">
+		<div class="card-header">
+			<button class="btn btn-outline-primary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#configuracao-canais-modal">
+				<i class="bi bi-book me-1"></i>
+				Abrir configuração dos canais
+			</button>
+		</div>
 		<form method="post" action="{{ action }}">
 			<div class="card-body">
 				{% if erro %}
@@ -150,6 +156,19 @@
 				<button class="btn btn-primary ms-1">Salvar</button>
 			</div>
 		</form>
+	</div>
+	<div class="modal fade" id="configuracao-canais-modal" tabindex="-1" aria-labelledby="configuracao-canais-modal-label" aria-hidden="true">
+		<div class="modal-dialog modal-xl modal-dialog-scrollable">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="configuracao-canais-modal-label">Configuração dos canais</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+				</div>
+				<div class="modal-body">
+					<pre class="mb-0" style="white-space: pre-wrap; tab-size: 4;">{{ configuracao_canais }}</pre>
+				</div>
+			</div>
+		</div>
 	</div>
 {% endblock %}
 {% block scripts %}

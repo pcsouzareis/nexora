@@ -166,7 +166,15 @@ final class ChannelController
 
     private function form(ResponseInterface $response, array $user, array $channel, string $action, string $title, ?string $error = null, ?string $success = null): ResponseInterface
     {
-        return $this->view->render($response, 'channels/form.twig', $this->context($user, ['canal' => $channel, 'action' => $action, 'title' => $title, 'types' => self::TYPES, 'bases' => $this->channels->findActiveBasesByCompany($this->companies->companyCode($user)), 'erro' => $error, 'sucesso' => $success]));
+        return $this->view->render($response, 'channels/form.twig', $this->context($user, ['canal' => $channel, 'action' => $action, 'title' => $title, 'types' => self::TYPES, 'bases' => $this->channels->findActiveBasesByCompany($this->companies->companyCode($user)), 'erro' => $error, 'sucesso' => $success, 'configuracao_canais' => $this->channelConfigurationDocument()]));
+    }
+
+    private function channelConfigurationDocument(): string
+    {
+        $path = dirname(__DIR__, 2) . '/Storage/documents/configuracao-canais.md';
+        $document = file_get_contents($path);
+
+        return $document === false ? 'Documento de configuração não encontrado.' : $document;
     }
 
     private function showChannel(ResponseInterface $response, array $user, int $code, ?string $secret = null): ResponseInterface
