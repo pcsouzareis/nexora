@@ -163,4 +163,20 @@ final class ChannelRepository
         $statement = $this->database->pdo()->prepare("UPDATE n003 SET pub003 = COALESCE(NULLIF(pub003, ''), :token) WHERE cod001 = :companyCode AND cod003 = :channelCode AND tip003 IN ('Facebook', 'Instagram')");
         $statement->execute(['companyCode' => $companyCode, 'channelCode' => $channelCode, 'token' => $token]);
     }
+
+    public function ensureWebchatToken(int $companyCode, int $channelCode, string $token): void
+    {
+        $statement = $this->database->pdo()->prepare(<<<'SQL'
+            UPDATE n003
+            SET pub003 = COALESCE(NULLIF(pub003, ''), :token)
+            WHERE cod001 = :companyCode
+              AND cod003 = :channelCode
+              AND tip003 = 'Web'
+        SQL);
+        $statement->execute([
+            'companyCode' => $companyCode,
+            'channelCode' => $channelCode,
+            'token' => $token,
+        ]);
+    }
 }

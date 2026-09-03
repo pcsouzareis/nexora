@@ -20,8 +20,11 @@
         form { border-top: 1px solid #dee2e6; padding: 12px; display: flex; gap: 8px; }
         textarea { flex: 1; resize: none; min-height: 42px; max-height: 120px; padding: 10px; border: 1px solid #ced4da; border-radius: 8px; font: inherit; }
         button { background: #0d6efd; color: white; border: 0; border-radius: 8px; padding: 0 16px; cursor: pointer; }
+        #close { background: #fff; color: #b02a37; border: 1px solid #b02a37; padding: 7px 12px; font-size: 12px; }
+        #close:hover { background: #b02a37; color: #fff; }
         button:disabled { opacity: .6; cursor: wait; }
         #notice { padding: 8px 18px; color: #6c757d; font-size: 12px; }
+        .chat-actions { padding: 0 12px 12px; text-align: right; }
     </style>
 </head>
 <body>
@@ -33,7 +36,7 @@
             <textarea id="message" maxlength="10000" required placeholder="Digite sua mensagem..." title="Digite sua dúvida ou solicitação para iniciar ou continuar o atendimento."></textarea>
             <button id="send" type="submit">Enviar</button>
         </form>
-        <div style="padding: 0 12px 12px; text-align: right;"><button id="close" type="button" style="background:none; color:#6c757d; padding:0; text-decoration:underline;">Encerrar atendimento</button></div>
+        <div class="chat-actions"><button id="close" type="button">Encerrar atendimento</button></div>
     </main>
     <script>
         const token = '{{ channel_token|e('js') }}';
@@ -49,7 +52,15 @@
         const form = document.getElementById('form');
         const input = document.getElementById('message');
         const send = document.getElementById('send');
+        const close = document.getElementById('close');
         const notice = document.getElementById('notice');
+
+        function disableChat(message) {
+            notice.textContent = message;
+            input.disabled = true;
+            send.disabled = true;
+            close.disabled = true;
+        }
 
         function render(items) {
             messages.innerHTML = '';
@@ -72,8 +83,7 @@
                 render(data.messages || []);
                 if (data.human_handling) notice.textContent = 'Um atendente assumiu esta conversa. A IA está pausada.';
                 if (data.status === 'Encerrada' || data.status === 'Cancelada') {
-                    notice.textContent = 'Este atendimento foi encerrado.';
-                    input.disabled = true; send.disabled = true;
+                    disableChat('Este atendimento foi encerrado.');
                 }
             }
         }
@@ -112,13 +122,21 @@
         loadMessages();
         setInterval(loadMessages, 5000);
 
-        document.getElementById('close').addEventListener('click', async () => {
+        close.addEventListener('click', async () => {
             if (!confirm('Deseja encerrar este atendimento?')) return;
+            close.disabled = true;
             const response = await fetch('/api/webchat/' + encodeURIComponent(token) + '/encerrar', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ session_id: sessionId })
             });
-            if (response.ok) await loadMessages();
+            const data = await response.json();
+            if (!response.ok) {
+                close.disabled = false;
+                notice.textContent = data.error || 'Não foi possível encerrar o atendimento.';
+                return;
+            }
+
+            disableChat(data.closed ? 'Este atendimento foi encerrado.' : 'Nenhum atendimento ativo para encerrar.');
         });
     </script>
 </body>

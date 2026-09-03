@@ -189,8 +189,15 @@ final class ChannelController
 
     private function showChannel(ResponseInterface $response, array $user, int $code, ?string $secret = null): ResponseInterface
     {
-        $channel = $this->channels->findByCompany($this->companies->companyCode($user), $code);
+        $companyCode = $this->companies->companyCode($user);
+        $channel = $this->channels->findByCompany($companyCode, $code);
         if ($channel === null) return $this->redirect($response, '/canais');
+
+        if ($channel['tip003'] === 'Web' && trim((string) ($channel['pub003'] ?? '')) === '') {
+            $this->channels->ensureWebchatToken($companyCode, $code, bin2hex(random_bytes(20)));
+            $channel = $this->channels->findByCompany($companyCode, $code);
+        }
+
         return $this->view->render($response, 'channels/show.twig', $this->context($user, ['canal' => $channel, 'webhook_secret' => $secret, 'can_update' => Permission::allows($user, Permission::CHANNEL_UPDATE)]));
     }
 
@@ -217,7 +224,7 @@ final class ChannelController
         return $user;
     }
 
-    private function context(array $user, array $data): array { return $data + ['app_name' => $_ENV['APP_NAME'] ?? 'Nexora', 'usuario' => ['codigo' => $user['cod002'], 'nome' => $user['des002'], 'email' => $user['ema002'], 'perfil' => $user['rol002']]]; }
+    private function context(array $user, array $data): array { return $data + ['app_name' => $_ENV['APP_NAME'] ?? 'Nexora', 'app_url' => $_ENV['APP_URL'] ?? '', 'usuario' => ['codigo' => $user['cod002'], 'nome' => $user['des002'], 'email' => $user['ema002'], 'perfil' => $user['rol002']]]; }
     private function redirect(ResponseInterface $response, string $location): ResponseInterface { return $response->withHeader('Location', $location)->withStatus(302); }
     private function clientIp(ServerRequestInterface $request): ?string { $ip = $request->getServerParams()['REMOTE_ADDR'] ?? null; return is_string($ip) ? $ip : null; }
 }
