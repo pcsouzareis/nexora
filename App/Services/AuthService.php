@@ -25,10 +25,6 @@ final class AuthService
             return false;
         }
 
-        if (!(bool) $user['sts013']) {
-            return false;
-        }
-
         if (!password_verify($password, $user['sen002'])) {
             return false;
         }

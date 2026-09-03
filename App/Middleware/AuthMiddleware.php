@@ -32,8 +32,7 @@ final class AuthMiddleware
 
         if (
             $user === null ||
-            !(bool) $user['sts002'] ||
-            !(bool) $user['sts013']
+            !(bool) $user['sts002']
         ) {
             Session::logout();
 

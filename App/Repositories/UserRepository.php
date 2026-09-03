@@ -120,7 +120,7 @@ final class UserRepository
             ON e.cod001 = u.cod001
         INNER JOIN n014 p
             ON p.cod014 = u.cod014
-        INNER JOIN n013 c
+        LEFT JOIN n013 c
             ON c.cod001 = u.cod001
         WHERE u.cod002 = :code
         LIMIT 1
