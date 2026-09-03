@@ -133,7 +133,7 @@ final class WebhookTestController
             'external_id' => 'teste-cliente-001',
             'name' => 'Cliente de teste',
             'conversation_id' => 'teste-conversa-001',
-            'message' => 'Qual é o horário de atendimento?',
+            'message' => null,
         ];
     }
 

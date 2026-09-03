@@ -88,7 +88,7 @@
                                         message
                                         <i class="bi bi-question-circle ms-1 text-muted" tabindex="0" data-bs-toggle="tooltip" title="Pergunta que será gravada como mensagem do cliente e enviada à IA. O message_id é gerado automaticamente pelo Nexora ao executar o teste."></i>
                                     </label>
-                                    <textarea id="message" name="message" class="form-control" rows="4" maxlength="10000" required>{{ dados.message|default('') }}</textarea>
+                                    <textarea placeholder="Digite uma pergunta, para a base de apendizado selecionada!" id="message" name="message" class="form-control" rows="4" maxlength="10000" required>{{ dados.message|default('') }}</textarea>
                                 </div>
                             </div>
                         {% endif %}

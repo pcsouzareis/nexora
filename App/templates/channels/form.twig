@@ -46,18 +46,6 @@
 						<div class="form-text">Obrigatória para Webchat, WhatsApp, Facebook e Instagram.</div>
 					</div>
 				</div>
-				<div class="border rounded p-3 mt-4" id="webhook-test-data">
-					<h5>Dados de teste do webhook</h5>
-					<p class="text-muted small">Os valores são gerados automaticamente ao abrir esta configuração e ao trocar o tipo de canal.</p>
-					<div class="row g-3">
-						<div class="col-md-4">
-							<label class="form-label" for="external_id">external_id</label><input id="external_id" name="external_id" class="form-control" maxlength="120" readonly></div>
-						<div class="col-md-4">
-							<label class="form-label" for="name">Nome do cliente</label><input id="name" name="name" class="form-control" maxlength="150" readonly></div>
-						<div class="col-md-4">
-							<label class="form-label" for="conversation_id">conversation_id</label><input id="conversation_id" name="conversation_id" class="form-control" maxlength="120" readonly></div>
-					</div>
-				</div>
 				<div class="form-check form-switch mt-4"><input id="sts003" type="checkbox" name="sts003" class="form-check-input" value="1" {% if canal.sts003 is not defined or canal.sts003 %} checked {% endif %}><label for="sts003" class="form-check-label">Canal ativo</label>
 				</div>
 
@@ -182,22 +170,7 @@ telegram = document.getElementById('telegram-settings'),
 pageLabel = meta.querySelector('label[for="pag003"]'),
 pageInput = document.getElementById('pag003'),
 help = document.getElementById('meta-help'),
-externalId = document.getElementById('external_id'),
-name = document.getElementById('name'),
-conversationId = document.getElementById('conversation_id'),
-firstNames = ['Ana', 'Beatriz', 'Bruno', 'Carlos', 'Clara', 'Daniel', 'Diego', 'Eduardo', 'Elisa', 'Fabio', 'Fernanda', 'Gabriel', 'Gustavo', 'Helena', 'Isabela', 'Joana', 'Jorge', 'Julia', 'Larissa', 'Laura', 'Leonardo', 'Lucas', 'Luana', 'Marcelo', 'Mariana', 'Marcos', 'Maria', 'Mateus', 'Miguel', 'Nathalia', 'Otavio', 'Patricia', 'Paulo', 'Rafael', 'Raquel', 'Renata', 'Ricardo', 'Roberto', 'Sofia', 'Thiago'],
-lastNames = ['Almeida', 'Alves', 'Barbosa', 'Barros', 'Batista', 'Cardoso', 'Carvalho', 'Castro', 'Costa', 'Cunha', 'Dias', 'Duarte', 'Fernandes', 'Ferreira', 'Freitas', 'Garcia', 'Gomes', 'Goncalves', 'Lima', 'Lopes', 'Machado', 'Macedo', 'Martins', 'Melo', 'Mendes', 'Monteiro', 'Moreira', 'Moura', 'Nascimento', 'Nogueira', 'Oliveira', 'Pereira', 'Ramos', 'Ribeiro', 'Rocha', 'Rodrigues', 'Santos', 'Silva', 'Souza', 'Teixeira'],
-refreshTestData = function (force) {
-if (force || externalId.value === '') {
-const suffix = Date.now().toString(36);
-const firstName = firstNames[Math.floor(Math.random() * 40)],
-lastName = lastNames[Math.floor(Math.random() * 40)];
-externalId.value = 'teste-' + type.value.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + suffix;
-name.value = firstName + ' ' + lastName;
-conversationId.value = 'teste-conversa-' + suffix
-}
-},
-refresh = function (forceTestData) {
+refresh = function () {
 const instagram = type.value === 'Instagram',
 isMeta = ['Facebook', 'Instagram'].includes(type.value);
 zapi.style.display = type.value === 'WhatsApp' ? 'block' : 'none';
@@ -208,12 +181,11 @@ meta.querySelector('h5').textContent = instagram ? 'Instagram Direct' : 'Faceboo
 pageLabel.textContent = instagram ? 'ID da conta profissional do Instagram' : 'ID da Página';
 pageInput.placeholder = instagram ? 'ID da conta profissional do Instagram' : 'ID numérico da Página';
 help.textContent = instagram ? 'Informe o ID da conta profissional, o Access Token com permissão para mensagens e o App Secret do aplicativo Meta. As credenciais são criptografadas.' : 'As credenciais são armazenadas criptografadas e não serão exibidas novamente.';
-refreshTestData(forceTestData)
 };
 type.addEventListener('change', function () {
-refresh(true)
+refresh()
 });
-refresh(false)
+refresh()
 });
 	</script>
 {% endblock %}
