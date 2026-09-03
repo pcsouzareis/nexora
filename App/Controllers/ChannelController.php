@@ -16,6 +16,7 @@ use App\Services\CurrentCompanyContext;
 use App\Support\Permission;
 use App\Support\Encryption;
 use App\Support\Session;
+use League\CommonMark\CommonMarkConverter;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Slim\Views\Twig;
@@ -174,7 +175,16 @@ final class ChannelController
         $path = dirname(__DIR__, 2) . '/Storage/documents/configuracao-canais.md';
         $document = file_get_contents($path);
 
-        return $document === false ? 'Documento de configuração não encontrado.' : $document;
+        if ($document === false) {
+            return '<p>Documento de configuração não encontrado.</p>';
+        }
+
+        $converter = new CommonMarkConverter([
+            'html_input' => 'strip',
+            'allow_unsafe_links' => false,
+        ]);
+
+        return $converter->convert($document)->getContent();
     }
 
     private function showChannel(ResponseInterface $response, array $user, int $code, ?string $secret = null): ResponseInterface
