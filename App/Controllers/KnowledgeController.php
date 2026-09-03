@@ -330,7 +330,16 @@ public function updateBaseAiConfiguration(
             'artigos' => $this->knowledge->findArticles((int) $base['cod005']),
             'can_manage' => Permission::allows($user, Permission::KNOWLEDGE_UPDATE),
             'n8n_key' => $n8nKey,
+            'configuracao_canais' => $this->channelConfigurationDocument(),
         ]));
+    }
+
+    private function channelConfigurationDocument(): string
+    {
+        $path = dirname(__DIR__, 2) . '/Storage/documents/configuracao-canais.md';
+        $document = file_get_contents($path);
+
+        return $document === false ? 'Documento de configuração não encontrado.' : $document;
     }
     private function context(array $user, array $data): array
     {

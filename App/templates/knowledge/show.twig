@@ -37,17 +37,23 @@
 				</form>
 			{% endif %}
 			<div class="card-header">
-				<button
-					class="btn btn-outline-secondary btn-sm"
-					type="button"
-					data-bs-toggle="collapse"
-					data-bs-target="#novo-artigo-base-{{ base.cod005 }}"
-					aria-expanded="false"
-					aria-controls="novo-artigo-base-{{ base.cod005 }}"
-				>
-					<i class="bi bi-file-earmark-plus me-1"></i>
-					Novo artigo
-				</button>
+				<div class="d-flex gap-2">
+					<button
+						class="btn btn-outline-secondary btn-sm"
+						type="button"
+						data-bs-toggle="collapse"
+						data-bs-target="#novo-artigo-base-{{ base.cod005 }}"
+						aria-expanded="false"
+						aria-controls="novo-artigo-base-{{ base.cod005 }}"
+					>
+						<i class="bi bi-file-earmark-plus me-1"></i>
+						Novo artigo
+					</button>
+					<button class="btn btn-outline-primary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#configuracao-canais-modal-{{ base.cod005 }}">
+						<i class="bi bi-book me-1"></i>
+						Abrir configuração dos canais
+					</button>
+				</div>
 			</div>
 			<div class="collapse" id="novo-artigo-base-{{ base.cod005 }}">
 				<form method="post" action="/conhecimento/{{ base.cod005 }}/artigos">
@@ -84,6 +90,19 @@
 					<button class="btn btn-primary">Adicionar artigo</button>
 				</div>
 				</form>
+			</div>
+		</div>
+		<div class="modal fade" id="configuracao-canais-modal-{{ base.cod005 }}" tabindex="-1" aria-labelledby="configuracao-canais-modal-label-{{ base.cod005 }}" aria-hidden="true">
+			<div class="modal-dialog modal-xl modal-dialog-scrollable">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="configuracao-canais-modal-label-{{ base.cod005 }}">Configuração dos canais</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+					</div>
+					<div class="modal-body">
+						<pre class="mb-0" style="white-space: pre-wrap; tab-size: 4;">{{ configuracao_canais }}</pre>
+					</div>
+				</div>
 			</div>
 		</div>
     <div class="card mb-3">
